@@ -1,0 +1,2071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1">
+<title>Caçador — Domínio Ancestral</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap');
+:root{
+  --gold:#c8a84b;--gold-light:#f0d080;--gold-dark:#8a6e28;
+  --ember:#e05a1a;--blood:#8b1a1a;--poison:#7a20c0;
+  --bg:#0d0a06;--bg2:#1a1208;--bg3:#120e06;--bg4:#1e1508;
+  --txt:#e8d4a0;--txt2:#9a8060;--txt3:#5a4a30;
+  --bdr:#3a2a10;--bdg:#5a4020;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--txt);font-family:'Crimson Pro',serif;overflow:hidden;touch-action:manipulation}
+.screen{display:none;width:100%;height:100%;flex-direction:column;position:absolute;top:0;left:0}
+.screen.active{display:flex}
+
+/* ══ TITLE ══ */
+#s-title{background:radial-gradient(ellipse at 50% 80%,#3a1a0060,#0d0a06);align-items:center;justify-content:center}
+.t-eye{font-family:'Cinzel',serif;font-size:9px;letter-spacing:6px;color:var(--gold);margin-bottom:10px;opacity:.8}
+.t-main{font-family:'Cinzel',serif;font-size:28px;font-weight:900;color:var(--gold-light);text-shadow:0 0 40px #c8a84b60;line-height:1.1;margin-bottom:4px}
+.t-sub{font-family:'Cinzel',serif;font-size:11px;color:var(--ember);letter-spacing:4px;margin-bottom:24px}
+.t-cards{display:flex;gap:12px;margin-bottom:24px}
+.t-card{background:var(--bg3);border:1px solid var(--bdg);border-radius:4px;padding:10px 14px;text-align:center;min-width:110px}
+.t-card-icon{font-size:30px;margin-bottom:4px}
+.t-card-name{font-family:'Cinzel',serif;font-size:8px;color:var(--gold);letter-spacing:1px}
+.btn-go{background:transparent;border:1px solid var(--gold);color:var(--gold-light);font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;padding:13px 34px;cursor:pointer;position:relative;overflow:hidden;transition:all .3s}
+.btn-go:active{background:#c8a84b20}
+.btn-go::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,#c8a84b20,transparent);animation:shim 3s infinite}
+@keyframes shim{to{left:200%}}
+.t-flavor{margin-top:18px;font-style:italic;font-size:12px;color:var(--txt2);line-height:1.6;max-width:270px;text-align:center}
+
+/* ══ MISSION ══ */
+#s-mission{background:var(--bg)}
+.m-header{background:var(--bg3);border-bottom:1px solid var(--bdr);padding:14px;text-align:center;flex-shrink:0}
+.m-header-title{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);letter-spacing:3px}
+.m-header-sub{font-size:11px;color:var(--txt2);font-style:italic;margin-top:2px}
+.m-list{padding:14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
+.m-card{background:var(--bg3);border:1px solid var(--bdg);border-radius:4px;overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.m-card:active{border-color:var(--gold);background:var(--bg4)}
+.m-card-top{display:flex;align-items:center;gap:12px;padding:12px}
+.m-icon{font-size:32px;width:40px;text-align:center}
+.m-info{flex:1}
+.m-name{font-family:'Cinzel',serif;font-size:13px;color:var(--txt);margin-bottom:2px}
+.m-loc{font-family:'Cinzel',serif;font-size:8px;color:var(--txt3);letter-spacing:2px}
+.m-stars{display:flex;gap:2px;margin-top:3px}
+.m-star{font-size:10px;color:var(--gold-dark)}.m-star.lit{color:var(--gold)}
+.m-card-bot{padding:7px 12px 10px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-wrap:wrap}
+.m-tag{font-family:'Cinzel',serif;font-size:8px;padding:2px 7px;border-radius:2px;letter-spacing:1px}
+.m-tag.fire{background:#3a1a00;color:#f08040;border:1px solid #6a3010}
+.m-tag.poison{background:#1a0a30;color:#c080f0;border:1px solid #5a2090}
+.m-bottom-bar{padding:10px 14px;border-top:1px solid var(--bdr);display:flex;gap:8px;flex-shrink:0}
+
+/* ══ FIGHT SCREEN ══ */
+#s-fight{background:var(--bg);overflow:hidden}
+
+/* HUD TOP */
+.hud{background:var(--bg3);border-bottom:1px solid var(--bdr);padding:8px 12px 6px;flex-shrink:0;z-index:10}
+.hud-row{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.hud-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--txt3);min-width:16px;text-align:right}
+.bar-t{flex:1;height:9px;background:#0d0a06;border:1px solid var(--bdr);border-radius:2px;overflow:hidden;position:relative}
+.bar-f{height:100%;border-radius:1px;transition:width .3s}
+.hp-f{background:linear-gradient(90deg,#2a6a2a,#4aaa4a)}
+.hp-f.psn{background:linear-gradient(90deg,#5a10a0,#a040e0)!important}
+.stm-f{background:linear-gradient(90deg,#8a5010,#d08020)}
+.bar-v{font-family:'Cinzel',serif;font-size:8px;color:var(--txt2);min-width:44px;text-align:right}
+.hud-items{display:flex;gap:5px}
+.itm{width:28px;height:28px;background:var(--bg4);border:1px solid var(--bdg);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;position:relative;transition:border-color .2s;flex-shrink:0}
+.itm:active{border-color:var(--gold)}
+.itm-n{position:absolute;bottom:1px;right:2px;font-family:'Cinzel',serif;font-size:7px;color:var(--gold)}
+.hud-q{font-family:'Cinzel',serif;font-size:8px;color:var(--gold);letter-spacing:1px;text-align:right;flex:1;white-space:nowrap}
+
+/* ENEMY HUD */
+.enemy-hud{background:var(--bg3);border-bottom:1px solid var(--bdr);padding:6px 12px;flex-shrink:0;display:flex;align-items:center;gap:10px}
+.e-name{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:2px;min-width:80px}
+.e-bar-wrap{flex:1}
+.e-bar-t{height:8px;background:#0a0806;border:1px solid var(--bdr);border-radius:1px;overflow:hidden}
+.e-bar-f{height:100%;background:linear-gradient(90deg,var(--blood),#e02020);transition:width .4s}
+.e-statuses{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap}
+.e-stag{font-family:'Cinzel',serif;font-size:7px;padding:1px 5px;border-radius:2px}
+.stag-stun{background:#4a2a00;color:#d08020;border:1px solid #8a5010}
+.stag-psn{background:#2a0a40;color:#c080f0;border:1px solid #7a20c0}
+.stag-enrage{background:#3a0000;color:#ff4040;border:1px solid #800000}
+.e-phase{font-family:'Cinzel',serif;font-size:8px;color:var(--txt3);letter-spacing:1px;text-align:right;min-width:60px}
+
+/* ═══════════════════════════════════
+   ARENA — the heart of the fight
+   ═══════════════════════════════════ */
+#arena{
+  flex:1;position:relative;overflow:hidden;
+  background:var(--bg2);
+  /* Ground */
+  border-bottom:2px solid var(--bdr);
+}
+
+/* Parallax background layers */
+.arena-sky{
+  position:absolute;inset:0 0 30% 0;
+  transition:background .8s;
+}
+.arena-ground{
+  position:absolute;bottom:0;left:0;right:0;height:32%;
+  background:linear-gradient(180deg,#1a1208,#0d0a06);
+  border-top:1px solid var(--bdr);
+}
+.arena-ground-line{
+  position:absolute;bottom:32%;left:0;right:0;height:1px;
+  background:var(--bdr);
+  box-shadow:0 -1px 8px #c8a84b10;
+}
+
+/* Player character */
+#player-el{
+  position:absolute;
+  bottom:32%;
+  transition:left .15s cubic-bezier(.2,1,.6,1), bottom .15s;
+  z-index:5;
+  transform-origin:center bottom;
+}
+#player-el.dodge-left{animation:slideLeft .22s ease-out}
+#player-el.dodge-right{animation:slideRight .22s ease-out}
+#player-el.attack-anim{animation:atkSwing .25s ease-out}
+#player-el.hit-anim{animation:playerHit .3s ease}
+@keyframes slideLeft{0%{transform:translateX(0)}40%{transform:translateX(-36px) scaleX(.85)}100%{transform:translateX(0)}}
+@keyframes slideRight{0%{transform:translateX(0)}40%{transform:translateX(36px) scaleX(.85)}100%{transform:translateX(0)}}
+@keyframes atkSwing{0%{transform:rotate(0)}30%{transform:rotate(-15deg) translateX(10px)}100%{transform:rotate(0)}}
+@keyframes playerHit{0%,100%{filter:none}50%{filter:brightness(2) saturate(0)}}
+
+/* Enemy character */
+#enemy-el{
+  position:absolute;
+  bottom:32%;
+  z-index:4;
+  transition:left .4s cubic-bezier(.3,0,.7,1), bottom .2s;
+  transform-origin:center bottom;
+  cursor:default;
+}
+#enemy-el.enemy-hit{animation:eHit .3s ease}
+#enemy-el.enemy-charge{animation:eCharge .5s ease-out}
+#enemy-el.enemy-roar{animation:eRoar .6s ease}
+@keyframes eHit{0%,100%{filter:none}30%{filter:brightness(3) saturate(0) drop-shadow(0 0 8px red)}}
+@keyframes eCharge{0%{transform:scaleX(1.15)}50%{transform:scaleX(.85) translateX(-10px)}100%{transform:scaleX(1)}}
+@keyframes eRoar{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* Body-part hit zones (invisible, positioned over SVG) */
+.part-zone{
+  position:absolute;cursor:crosshair;z-index:6;
+  border:1px dashed transparent;border-radius:50%;
+  transition:border-color .2s, background .2s;
+}
+.part-zone:hover,.part-zone.highlight{
+  border-color:#ffffff30;background:#ffffff08;
+}
+.part-zone.highlight-head{border-color:#ff604060;background:#ff604010}
+.part-zone.highlight-tail{border-color:#f0d08040;background:#f0d08010}
+.part-zone.broken{border-color:#ff000060!important}
+
+/* Attack indicator arc */
+#atk-arc{
+  position:absolute;z-index:7;pointer-events:none;
+  bottom:32%;
+  width:80px;height:80px;
+  border-radius:50%;
+  border:2px solid var(--gold);
+  opacity:0;
+  transition:opacity .15s;
+  transform:translate(-50%,50%);
+}
+#atk-arc.show{opacity:.5;animation:arcPulse .4s ease-out forwards}
+@keyframes arcPulse{0%{transform:translate(-50%,50%) scale(.5);opacity:.8}100%{transform:translate(-50%,50%) scale(1.2);opacity:0}}
+
+/* Enemy attack warning */
+#atk-warning{
+  position:absolute;z-index:8;pointer-events:none;
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;
+  color:#ff4040;
+  background:#ff000018;
+  border:1px solid #ff404040;
+  padding:4px 10px;border-radius:2px;
+  opacity:0;transition:opacity .15s;
+  transform:translateX(-50%);
+  white-space:nowrap;
+}
+#atk-warning.show{opacity:1;animation:warnBlink .25s ease-in-out infinite alternate}
+@keyframes warnBlink{0%{opacity:.7}100%{opacity:1}}
+
+/* Dodge arrow indicators */
+.dodge-hint{
+  position:absolute;bottom:50%;
+  font-size:22px;
+  opacity:0;transition:opacity .2s;
+  pointer-events:none;z-index:9;
+  animation:hintFloat 1s ease-in-out infinite alternate;
+}
+.dodge-hint.show{opacity:.7}
+.dodge-hint.left{left:8px}
+.dodge-hint.right{right:8px}
+@keyframes hintFloat{0%{transform:translateY(0)}100%{transform:translateY(-6px)}}
+
+/* Floating damage / effect labels */
+.float-label{
+  position:absolute;pointer-events:none;z-index:20;
+  font-family:'Cinzel',serif;font-weight:700;
+  animation:floatUp 1.2s ease-out forwards;
+  white-space:nowrap;
+}
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}30%{transform:translateY(-18px) scale(1.2)}100%{opacity:0;transform:translateY(-50px) scale(.7)}}
+
+/* Part broken flash */
+.part-broken-flash{
+  position:absolute;pointer-events:none;z-index:15;
+  font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;
+  color:#ff8040;background:#3a1a0060;border:1px solid #ff6020;
+  padding:3px 10px;border-radius:2px;
+  animation:partFlash 1.5s ease-out forwards;
+  white-space:nowrap;transform:translateX(-50%);
+}
+@keyframes partFlash{0%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-30px)}}
+
+/* Poison screen vignette */
+#psn-vignette{
+  position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:radial-gradient(ellipse at center,transparent 40%,#7a20c040 100%);
+  opacity:0;transition:opacity .5s;
+}
+#psn-vignette.active{opacity:1;animation:psnPulse 1.5s ease-in-out infinite}
+@keyframes psnPulse{0%,100%{opacity:.3}50%{opacity:.8}}
+
+/* ═══ ACTION BAR ═══ */
+#action-bar{
+  background:var(--bg3);border-top:1px solid var(--bdr);
+  padding:8px 10px;flex-shrink:0;z-index:10;
+}
+.act-row{display:flex;gap:6px;margin-bottom:6px}
+.act-btn{
+  flex:1;background:var(--bg4);border:1px solid var(--bdg);color:var(--txt);
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;
+  padding:9px 3px 7px;cursor:pointer;border-radius:2px;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  position:relative;overflow:hidden;transition:all .15s;
+}
+.act-btn:active:not(:disabled){transform:scale(.95);background:#2a1a00}
+.act-btn:disabled{opacity:.35;cursor:not-allowed}
+.act-icon{font-size:16px}
+.cd-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--gold);transition:width .05s linear}
+.btn-atk{border-color:#6a3010}.btn-heavy{border-color:#8a2000}
+.btn-skill{border-color:#4a2a6a}.btn-dodge{border-color:#1a3a6a}
+/* Controles de Movimento (Andar e Esquivar) */
+.move-row { display: flex; gap: 6px; justify-content: space-between; margin-bottom: 6px; }
+.move-group { display: flex; gap: 4px; flex: 1; }
+.m-btn { 
+  flex: 1; background: var(--bg4); border: 1px solid var(--bdg); color: var(--txt2); 
+  font-family: 'Cinzel', serif; font-size: 8px; padding: 11px 2px; border-radius: 2px; 
+  text-align: center; cursor: pointer; transition: all .15s; touch-action: manipulation;
+}
+.m-btn.dodge { border-color: #1a3a6a; color: #6090e0; }
+.m-btn:active:not(:disabled) { transform: scale(0.95); background: #2a2a2a; }
+.m-btn.dodge:active:not(:disabled) { background: #0a1a3a; }
+.m-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* Part targeting buttons */
+.part-btns{display:flex;gap:4px;margin-top:6px;overflow-x:auto;padding-bottom:2px}
+.part-btn{
+  flex-shrink:0;background:var(--bg4);border:1px solid var(--bdg);color:var(--txt2);
+  font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;
+  padding:5px 8px;cursor:pointer;border-radius:2px;transition:all .15s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.part-btn:active:not(:disabled){background:#2a1a00}
+.part-btn:disabled{opacity:.35}
+.part-btn.weakspot{border-color:#f0a030;color:#f0a030}
+.part-btn.broken{border-color:var(--blood);color:#ff6060}
+.part-icon{font-size:13px}
+.part-hp-mini{height:3px;width:28px;background:#0a0806;border-radius:1px;overflow:hidden;margin-top:1px}
+.part-hp-fill{height:100%;background:linear-gradient(90deg,var(--blood),#e02020);transition:width .3s}
+
+/* ═══ LOG ═══ */
+#log{
+  height:40px;overflow-y:auto;padding:3px 12px;
+  background:var(--bg);border-top:1px solid var(--bdr);flex-shrink:0;
+}
+#log::-webkit-scrollbar{display:none}
+.ll{font-size:10px;line-height:1.5;font-style:italic;color:var(--txt2)}
+.ll.dmg{color:#e06040}.ll.pdmg{color:#ff4040}.ll.crit{color:var(--gold);font-weight:700;font-style:normal}
+.ll.sys{color:var(--gold);font-style:normal;letter-spacing:1px}.ll.psn{color:#c080f0}
+.ll.part{color:#f0a030}
+
+/* ═══ REWARD ═══ */
+#s-reward{background:var(--bg);align-items:center;padding:16px;overflow-y:auto}
+.rw-icon{font-size:52px;margin-top:12px}
+.rw-title{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);letter-spacing:4px;margin:12px 0 3px}
+.rw-monster{font-family:'Cinzel',serif;font-size:20px;font-weight:700;color:var(--txt);margin-bottom:14px}
+.rw-list{width:100%;max-width:320px;background:var(--bg3);border:1px solid var(--bdg);border-radius:3px;overflow:hidden;margin-bottom:16px}
+.rw-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bdr);animation:rwSlide .4s ease forwards;opacity:0;transform:translateX(-8px)}
+@keyframes rwSlide{to{opacity:1;transform:translateX(0)}}
+.rw-item:last-child{border-bottom:none}
+.ri-icon{font-size:18px;width:24px;text-align:center}
+.ri-info{flex:1}
+.ri-name{font-family:'Cinzel',serif;font-size:11px;color:var(--txt)}
+.ri-desc{font-size:10px;color:var(--txt2);font-style:italic}
+.ri-qty{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:var(--gold)}
+.r1 .ri-name{color:#aaa}.r2 .ri-name{color:#4aaa4a}.r3 .ri-name{color:#4a8ae0}.r4 .ri-name{color:#aa40e0}.r5 .ri-name{color:#e0a020}
+
+/* ═══ FORGE ═══ */
+#s-forge{background:var(--bg)}
+.fg-hdr{background:var(--bg3);border-bottom:1px solid var(--bdr);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.fg-hdr-icon{font-size:20px}
+.fg-hdr-t{flex:1}
+.fg-hdr-title{font-family:'Cinzel',serif;font-size:12px;color:var(--gold);letter-spacing:2px}
+.fg-hdr-sub{font-size:10px;color:var(--txt2);font-style:italic}
+.fg-tabs{display:flex;background:var(--bg3);border-bottom:1px solid var(--bdr);flex-shrink:0;overflow-x:auto}
+.fg-tab{flex-shrink:0;padding:9px 11px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--txt2);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.fg-tab.on{color:var(--gold);border-bottom-color:var(--gold)}
+.fg-body{flex:1;overflow-y:auto;padding:12px}
+.fg-body::-webkit-scrollbar{width:2px}
+.fg-body::-webkit-scrollbar-thumb{background:var(--bdg)}
+.set-hdr{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;margin:10px 0 8px 2px}
+.set-hdr.sj{color:#d06010}.set-hdr.sa{color:#c080f0}
+.eq-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:3px;margin-bottom:9px;overflow:hidden;transition:border-color .2s}
+.eq-card.ok{border-color:var(--bdg)}.eq-card.on{border-color:var(--gold);background:var(--bg4)}
+.eq-card-top{display:flex;align-items:center;gap:9px;padding:9px 11px;border-bottom:1px solid var(--bdr)}
+.eq-icon{font-size:18px;width:24px;text-align:center}
+.eq-info{flex:1}
+.eq-name{font-family:'Cinzel',serif;font-size:11px;color:var(--txt);margin-bottom:1px}
+.eq-slot{font-family:'Cinzel',serif;font-size:7px;color:var(--txt3);letter-spacing:2px}
+.eq-stars{display:flex;gap:1px}
+.es{font-size:7px;color:var(--gold-dark)}.es.l{color:var(--gold)}
+.eq-stats{padding:7px 11px;display:flex;gap:6px;flex-wrap:wrap}
+.sp{background:var(--bg4);border:1px solid var(--bdr);border-radius:2px;padding:2px 7px;font-family:'Cinzel',serif;font-size:8px}
+.sp .sv{color:var(--gold);margin-left:3px}
+.eq-mats{padding:7px 11px;border-top:1px solid var(--bdr)}
+.ml{font-family:'Cinzel',serif;font-size:7px;color:var(--txt3);letter-spacing:2px;margin-bottom:5px}
+.mats{display:flex;gap:4px;flex-wrap:wrap}
+.mc{display:flex;align-items:center;gap:3px;padding:2px 7px;border-radius:2px;font-size:9px;border:1px solid}
+.mc.hv{background:#1a2a1a;border-color:#2a4a2a;color:#6aaa6a}
+.mc.nd{background:#2a1a1a;border-color:#4a2a2a;color:#aa5050}
+.eq-acts{padding:7px 11px;display:flex;gap:6px;border-top:1px solid var(--bdr)}
+.btn-forge{flex:1;background:transparent;border:1px solid var(--gold);color:var(--gold-light);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:7px;cursor:pointer;transition:all .2s}
+.btn-forge:active:not(:disabled){background:#c8a84b20}
+.btn-forge:disabled{border-color:var(--bdr);color:var(--txt3);cursor:not-allowed}
+.btn-equip{flex:1;background:transparent;border:1px solid var(--ember);color:var(--ember);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:7px;cursor:pointer}
+.btn-equip:active{background:#e05a1a20}
+.eq-badge{background:#c8a84b20;border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;padding:3px 9px}
+/* ═══ LAB (MOD MAKER) ═══ */
+#s-lab { background: var(--bg); }
+.lab-form { display: flex; flex-direction: column; gap: 14px; padding-bottom: 24px; }
+.lab-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.lab-col { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.lab-lbl { font-family: 'Cinzel', serif; font-size: 9px; color: var(--gold); letter-spacing: 2px; }
+.lab-inp { background: var(--bg4); border: 1px solid var(--bdg); color: var(--txt); padding: 9px; font-family: 'Crimson Pro', serif; font-size: 14px; border-radius: 2px; transition: border-color .2s; }
+.lab-inp:focus { outline: none; border-color: var(--gold); }
+.lab-file-box { background: var(--bg3); border: 1px dashed var(--gold-dark); border-radius: 3px; padding: 18px; text-align: center; cursor: pointer; transition: all .3s; position: relative; }
+.lab-file-box:hover { background: var(--bg4); border-color: var(--gold); }
+.lab-file-txt { font-family: 'Cinzel', serif; font-size: 10px; color: var(--gold-light); letter-spacing: 2px; pointer-events: none; }
+.lab-file-inp { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.lab-img-preview { max-width: 100%; max-height: 120px; object-fit: contain; margin-top: 10px; display: none; filter: drop-shadow(0 0 15px rgba(200,168,75,0.2)); }
+/* Mannequin */
+.mann-sec{background:var(--bg3);border:1px solid var(--bdg);border-radius:3px;padding:12px;margin-bottom:12px}
+.mann-title{font-family:'Cinzel',serif;font-size:9px;color:var(--gold);letter-spacing:3px;margin-bottom:10px;text-align:center}
+.mann-layout{display:grid;grid-template-columns:1fr 72px 1fr;gap:5px;align-items:start}
+.mann-col{display:flex;flex-direction:column;gap:5px}
+.mann-center{display:flex;flex-direction:column;align-items:center}
+.m-slot{background:var(--bg4);border:1px solid var(--bdr);border-radius:2px;padding:5px 6px;text-align:center}
+.m-slot.filled{border-color:var(--gold-dark);background:#1e1500}
+.ms-lbl{font-family:'Cinzel',serif;font-size:6px;color:var(--txt3);letter-spacing:1px;margin-bottom:2px}
+.ms-ico{font-size:14px;display:block}
+.ms-itm{font-family:'Cinzel',serif;font-size:7px;color:var(--gold);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:66px}
+.tot-stats{margin-top:9px;padding-top:9px;border-top:1px solid var(--bdr);display:flex;justify-content:space-around}
+.ts{text-align:center}
+.tsv{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold)}
+.tsl{font-family:'Cinzel',serif;font-size:7px;color:var(--txt3);letter-spacing:1px}
+.inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px}
+.iv-item{background:var(--bg4);border:1px solid var(--bdr);border-radius:2px;padding:7px 5px;text-align:center;position:relative}
+.iv-ico{font-size:16px;display:block;margin-bottom:2px}
+.iv-nm{font-family:'Cinzel',serif;font-size:6px;color:var(--txt2);display:block;line-height:1.3}
+.iv-qty{position:absolute;bottom:2px;right:3px;font-family:'Cinzel',serif;font-size:8px;color:var(--gold)}
+
+/* ═══ TIMELINE ═══ */
+.tl-wrap{background:var(--bg3);border-top:1px solid var(--bdr);padding:6px 12px;flex-shrink:0}
+.tl-lbl{font-family:'Cinzel',serif;font-size:8px;color:var(--txt3);letter-spacing:3px;margin-bottom:5px}
+.tl-track{display:flex;align-items:center;overflow-x:auto;padding-bottom:2px}
+.tl-track::-webkit-scrollbar{height:2px}
+.tl-track::-webkit-scrollbar-thumb{background:var(--gold-dark)}
+.tl-n{flex-shrink:0;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--bdr);background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:12px;position:relative;transition:all .3s}
+.tl-n.done{border-color:var(--gold-dark);background:#2a1a00}
+.tl-n.curr{border-color:var(--gold);background:#3a2200;box-shadow:0 0 8px #c8a84b40}
+.tl-n.boss{border-color:var(--ember);width:36px;height:36px;font-size:16px}
+.tl-n.boss.curr{box-shadow:0 0 12px #e05a1a60}
+.tl-c{flex:1;min-width:8px;height:1px;background:var(--bdr);position:relative}
+.tl-c.done::after{content:'';position:absolute;inset:0;background:var(--gold-dark)}
+.tl-skull{position:absolute;top:-5px;right:-3px;font-size:8px;opacity:0;transition:opacity .3s}
+.tl-n.done .tl-skull{opacity:1}
+
+/* ═══ BOSS INTRO ═══ */
+#boss-intro{position:fixed;inset:0;z-index:200;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+#boss-intro.on{display:flex}
+.bi-eye{font-family:'Cinzel',serif;font-size:9px;letter-spacing:8px;color:var(--ember);animation:biFade 2s ease}
+.bi-name{font-family:'Cinzel',serif;font-size:28px;font-weight:900;color:var(--gold-light);text-align:center;animation:biFade 2s ease .5s both;text-shadow:0 0 40px #e05a1a80}
+.bi-icon{font-size:48px;animation:biFade 1.5s ease 1s both}
+@keyframes biFade{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+
+/* ═══ DEATH ═══ */
+#s-death{background:#080000;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:40px}
+.dt{font-family:'Cinzel',serif;font-size:34px;font-weight:900;color:var(--blood);letter-spacing:4px;margin-bottom:8px;animation:dPulse 2s ease-in-out infinite}
+@keyframes dPulse{0%,100%{opacity:.8}50%{opacity:1}}
+.ds{font-size:13px;color:var(--txt2);font-style:italic;margin-bottom:28px}
+
+/* ═══ COMPLETE ═══ */
+#s-complete{background:var(--bg);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;overflow-y:auto}
+.cmp-eye{font-family:'Cinzel',serif;font-size:9px;letter-spacing:6px;color:var(--gold);margin-bottom:8px}
+.cmp-icon{font-size:64px;margin-bottom:12px}
+.cmp-name{font-family:'Cinzel',serif;font-size:24px;font-weight:900;color:var(--txt);margin-bottom:5px}
+.cmp-sub{font-style:italic;color:var(--txt2);font-size:12px;margin-bottom:18px}
+
+/* ═══ SHARED BUTTONS ═══ */
+.btn-p{background:transparent;border:1px solid var(--gold);color:var(--gold-light);font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;padding:11px 26px;cursor:pointer;transition:all .2s;margin:5px}
+.btn-p:active{background:#c8a84b20}
+.btn-s{background:transparent;border:1px solid var(--bdg);color:var(--txt2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;padding:9px 18px;cursor:pointer;transition:all .2s;margin:5px}
+.btn-s:active{background:#3a2a1020}
+
+/* ═══ NOTIF ═══ */
+.notif{position:fixed;top:14px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--gold);font-family:'Cinzel',serif;font-size:10px;color:var(--gold-light);padding:9px 18px;z-index:300;letter-spacing:1px;animation:nIn .3s ease,nOut .3s ease 2s forwards;white-space:nowrap;pointer-events:none}
+@keyframes nIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes nOut{to{opacity:0;transform:translateX(-50%) translateY(-8px)}}
+
+/* Modal */
+.modal-ov{position:fixed;inset:0;z-index:100;background:#0d0a06e0;display:none;align-items:center;justify-content:center;padding:18px}
+.modal-ov.on{display:flex}
+.modal-box{background:var(--bg3);border:1px solid var(--gold);border-radius:3px;max-width:300px;width:100%;padding:22px;text-align:center;animation:mIn .3s ease}
+@keyframes mIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.mi{font-size:36px;margin-bottom:10px}.mt{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);margin-bottom:5px}
+.ms{font-family:'Cinzel',serif;font-size:8px;color:var(--txt3);letter-spacing:3px;margin-bottom:12px}
+.mb{font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:18px}
+.mbtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<!-- TITLE -->
+<div id="s-title" class="screen active">
+  <div style="text-align:center;padding:28px 20px;position:relative;z-index:2">
+    <p class="t-eye">★ Domínio Ancestral ★</p>
+    <h1 class="t-main">CAÇADOR</h1>
+    <p class="t-sub">Hunt · Forge · Survive</p>
+    <div class="t-cards">
+      <div class="t-card"><div class="t-card-icon">🔥</div><div class="t-card-name">GRANDE JARGAS</div></div>
+      <div class="t-card"><div class="t-card-icon">🦖</div><div class="t-card-name">ANJANATH</div></div>
+    </div>
+    <button class="btn-go" onclick="showScreen('s-mission');renderMissions()">◆ INICIAR ◆</button>
+    <p class="t-flavor">"Dois dragões. Duas lendas.<br>Uma armadura aguarda o caçador que sobreviver."</p>
+  </div>
+</div>
+
+<!-- MISSION SELECT -->
+<div id="s-mission" class="screen">
+  <div class="m-header">
+    <div class="m-header-title">◆ QUADRO DE MISSÕES ◆</div>
+    <div class="m-header-sub">Escolha sua caçada</div>
+  </div>
+  <div class="m-list" id="m-list"></div>
+  <div class="m-bottom-bar">
+    <button class="btn-s" style="flex:1;margin:0" onclick="showScreen('s-forge');renderForge()">🔨 Ferraria</button>
+    <button class="btn-s" style="flex:1;margin:0" onclick="showScreen('s-lab');renderLab()">🧪 Lab</button>
+    <button class="btn-s" style="margin:0" onclick="showScreen('s-title')">↩</button>
+  </div>
+</div>
+
+<!-- FIGHT SCREEN -->
+<div id="s-fight" class="screen">
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-row">
+      <span class="hud-lbl">HP</span>
+      <div class="bar-t" style="position:relative">
+        <div class="bar-f hp-f" id="hp-bar" style="width:100%"></div>
+      </div>
+      <span class="bar-v" id="hp-val">150/150</span>
+      <div class="hud-items">
+        <div class="itm" onclick="usePotion()">🧪<span class="itm-n" id="pot-n">5</span></div>
+        <div class="itm" onclick="useAntidote()">🌿<span class="itm-n" id="anti-n">3</span></div>
+        <div class="itm" onclick="useFlash()">💥<span class="itm-n" id="flash-n">2</span></div>
+      </div>
+    </div>
+    <div class="hud-row">
+      <span class="hud-lbl">STM</span>
+      <div class="bar-t"><div class="bar-f stm-f" id="stm-bar" style="width:100%"></div></div>
+      <span class="bar-v" id="stm-val">100/100</span>
+      <span class="hud-q" id="q-label">☆ Caçada</span>
+    </div>
+  </div>
+  <!-- ENEMY HUD -->
+  <div class="enemy-hud">
+    <span class="e-name" id="e-name">—</span>
+    <div class="e-bar-wrap">
+      <div class="e-bar-t"><div class="e-bar-f" id="e-hp-bar" style="width:100%"></div></div>
+      <div class="e-statuses" id="e-statuses"></div>
+    </div>
+    <span class="e-phase" id="e-phase">—</span>
+  </div>
+
+  <!-- ARENA -->
+  <div id="arena">
+    <div class="arena-sky" id="arena-sky"></div>
+    <div class="arena-ground"></div>
+    <div class="arena-ground-line"></div>
+    <div id="psn-vignette"></div>
+
+    <!-- Player -->
+    <div id="player-el">
+      <svg id="player-svg" width="52" height="72" viewBox="0 0 52 72">
+        <!-- Caçador com armadura dinâmica -->
+        <g id="player-body">
+          <rect x="18" y="7" width="16" height="14" rx="8" fill="#8a7050" id="ph-head"/>
+          <rect x="14" y="21" width="24" height="26" rx="3" fill="#4a6a8a" id="ph-chest"/>
+          <rect x="7" y="23" width="9" height="20" rx="3" fill="#4a6a8a" id="ph-larm"/>
+          <rect x="36" y="23" width="9" height="20" rx="3" fill="#4a6a8a" id="ph-rarm"/>
+          <rect x="15" y="47" width="10" height="22" rx="3" fill="#3a4a5a" id="ph-lleg"/>
+          <rect x="27" y="47" width="10" height="22" rx="3" fill="#3a4a5a" id="ph-rleg"/>
+          <!-- weapon -->
+          <rect x="1" y="13" width="5" height="36" rx="2.5" fill="#c0c0c0" id="ph-weapon" transform="rotate(-15 1 13)"/>
+          <rect x="1" y="16" width="12" height="5" rx="2.5" fill="#909090" transform="rotate(-15 1 16)"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- Enemy (positioned by JS) -->
+    <div id="enemy-el">
+      <!-- SVG injected by JS -->
+      <!-- Body part zones injected by JS -->
+    </div>
+
+    <!-- Attack arc -->
+    <div id="atk-arc"></div>
+    <!-- Warning -->
+    <div id="atk-warning">⚠ ATAQUE!</div>
+    <!-- Dodge hints -->
+    <div class="dodge-hint left" id="dh-left">←</div>
+    <div class="dodge-hint right" id="dh-right">→</div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="tl-wrap">
+    <div class="tl-lbl">ROTA DE CAÇADA</div>
+    <div class="tl-track" id="tl-track"></div>
+  </div>
+
+  <!-- LOG -->
+  <div id="log"></div>
+
+  <!-- ACTION BAR -->
+  <div id="action-bar">
+    <div class="act-row">
+      <button class="act-btn btn-atk" id="btn-atk" onclick="doAttack('body')"><span class="act-icon">⚔️</span>Ataque<div class="cd-bar" id="cd-atk" style="width:0%"></div></button>
+      <button class="act-btn btn-heavy" id="btn-heavy" onclick="doAttack('heavy')"><span class="act-icon">🪓</span>Forte<div class="cd-bar" id="cd-heavy" style="width:0%"></div></button>
+      <button class="act-btn btn-skill" id="btn-skill" onclick="doAttack('skill')"><span class="act-icon">💥</span>Especial<div class="cd-bar" id="cd-skill" style="width:0%"></div></button>
+    </div>
+    <!-- Dodge row -->
+   <!-- Controles de Movimentação -->
+    <div class="move-row">
+      <div class="move-group">
+        <button class="m-btn" onpointerdown="startWalk(-1)" onpointerup="stopWalk()" onpointerout="stopWalk()">◀ ANDAR</button>
+        <button class="m-btn dodge" id="btn-dl" onclick="doDodge(-1)">💨 ESQUIVA</button>
+      </div>
+      <div class="move-group">
+        <button class="m-btn dodge" id="btn-dr" onclick="doDodge(1)">ESQUIVA 💨</button>
+        <button class="m-btn" onpointerdown="startWalk(1)" onpointerup="stopWalk()" onpointerout="stopWalk()">ANDAR ▶</button>
+      </div>
+    </div>
+    <!-- Part targeting -->
+    <div class="part-btns" id="part-btns"></div>
+  </div>
+</div>
+
+<!-- REWARD -->
+<div id="s-reward" class="screen">
+  <div class="rw-icon" id="rw-icon">💀</div>
+  <p class="rw-title">RECOMPENSAS</p>
+  <p class="rw-monster" id="rw-name">—</p>
+  <div class="rw-list" id="rw-list"></div>
+  <div id="rw-btns"></div>
+</div>
+
+<!-- FORGE -->
+<div id="s-forge" class="screen">
+  <div class="fg-hdr">
+    <span class="fg-hdr-icon">🔨</span>
+    <div class="fg-hdr-t"><div class="fg-hdr-title">FERRARIA DO ANCESTRAL</div><div class="fg-hdr-sub">Dois conjuntos lendários</div></div>
+    <button class="btn-s" style="padding:7px 11px;font-size:8px;margin:0" onclick="showScreen('s-mission');renderMissions()">↩ MISSÕES</button>
+  </div>
+  <div class="fg-tabs" id="fg-tabs">
+    <button class="fg-tab on" onclick="setFTab('equip')">Equipado</button>
+    <button class="fg-tab" onclick="setFTab('jargas')">Jargas</button>
+    <button class="fg-tab" onclick="setFTab('anjanath')">Anjanath</button>
+    <button class="fg-tab" onclick="setFTab('inv')">Materiais</button>
+  </div>
+  <div class="fg-body" id="fg-body"></div>
+</div>
+<!-- LABORATÓRIO (MOD MAKER) -->
+<div id="s-lab" class="screen">
+  <div class="fg-hdr">
+    <span class="fg-hdr-icon">🧪</span>
+    <div class="fg-hdr-t">
+      <div class="fg-hdr-title">LABORATÓRIO DE ANOMALIAS</div>
+      <div class="fg-hdr-sub">Forje novas ameaças e lendas</div>
+    </div>
+    <button class="btn-s" style="padding:7px 11px;font-size:8px;margin:0" onclick="showScreen('s-mission');renderMissions()">↩ MISSÕES</button>
+  </div>
+  <div class="fg-tabs" id="lab-tabs">
+    <button class="fg-tab on" onclick="setLabTab('monster')">Criar Monstro</button>
+    <button class="fg-tab" onclick="setLabTab('armor')">Armaduras</button>
+    <button class="fg-tab" onclick="setLabTab('io')">Exportar / Importar</button>
+  </div>
+  <div class="fg-body" id="lab-body">
+    <!-- O conteúdo será gerado dinamicamente pelo JavaScript -->
+  </div>
+</div>
+<!-- COMPLETE -->
+<div id="s-complete" class="screen">
+  <p class="cmp-eye" id="cmp-eye">★ CONJUNTO COMPLETO ★</p>
+  <div class="cmp-icon" id="cmp-icon">🐉</div>
+  <h2 class="cmp-name" id="cmp-name">—</h2>
+  <p class="cmp-sub" id="cmp-sub">—</p>
+  <div style="margin:14px 0;padding:14px;background:var(--bg3);border:1px solid var(--gold);border-radius:3px;max-width:260px;width:100%">
+    <div style="font-family:'Cinzel',serif;font-size:9px;color:var(--txt3);letter-spacing:2px;margin-bottom:6px">PODER TOTAL</div>
+    <div style="font-family:'Cinzel',serif;font-size:36px;font-weight:900;color:var(--gold)" id="cmp-power">0</div>
+    <div style="font-size:10px;color:var(--txt2);margin-top:4px" id="cmp-slabel">—</div>
+  </div>
+  <div id="cmp-btns"></div>
+</div>
+
+<!-- DEATH -->
+<div id="s-death" class="screen">
+  <div class="dt">DESMAIOU</div>
+  <p class="ds" id="ds-sub">—</p>
+  <button class="btn-p" onclick="retryHunt()">◆ TENTAR NOVAMENTE ◆</button>
+  <button class="btn-s" onclick="showScreen('s-mission');renderMissions()">↩ Missões</button>
+</div>
+
+<!-- BOSS INTRO -->
+<div id="boss-intro">
+  <p class="bi-eye" id="bi-eye">— Boss —</p>
+  <h2 class="bi-name" id="bi-name">—</h2>
+  <div class="bi-icon" id="bi-icon">🔥</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal">
+  <div class="modal-box">
+    <div class="mi" id="m-icon">⚔️</div>
+    <div class="mt" id="m-title">—</div>
+    <div class="ms" id="m-sub">—</div>
+    <div class="mb" id="m-body">—</div>
+    <div class="mbtns" id="m-btns"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════
+const MISSIONS = {
+  jargas:{id:'jargas',name:'Grande Jargas',icon:'🔥',location:'DOMÍNIO ANCESTRAL',stars:3,
+    tags:['fire'],tagLabels:['Fogo'],
+    phases:[{e:'jagras'},{e:'jagras'},{e:'girros'},{e:'jagras'},{e:'girros'},{e:'grande_jargas',boss:true}],
+    skyColor:'radial-gradient(ellipse at 50% 100%,#3a1a0840,#0d0a0690)',
+    bossEye:'— Dragão Ancião —',bossIcon:'🔥'},
+  anjanath:{id:'anjanath',name:'Anjanath',icon:'🦖',location:'FLORESTA ANCESTRAL',stars:4,
+    tags:['poison'],tagLabels:['Veneno'],
+    phases:[{e:'velocidrome'},{e:'velocidrome'},{e:'kestidone'},{e:'velocidrome'},{e:'kestidone'},{e:'anjanath',boss:true}],
+    skyColor:'radial-gradient(ellipse at 50% 100%,#1a0a3040,#0d0a0690)',
+    bossEye:'— Dragão Bruto —',bossIcon:'🦖'},
+};
+
+// Body parts per enemy (relative % of their SVG box)
+const PARTS_DEF = {
+  grande_jargas:[
+    {id:'head',label:'Cabeça',icon:'💀',x:'32%',y:'5%',w:'36%',h:'32%',dmgMult:1.6,weakspot:true,maxHp:3,hp:3},
+    {id:'body',label:'Corpo',icon:'🦎',x:'15%',y:'35%',w:'70%',h:'35%',dmgMult:1.0,maxHp:5,hp:5},
+    {id:'tail',label:'Cauda',icon:'🐉',x:'68%',y:'30%',w:'32%',h:'30%',dmgMult:1.3,maxHp:4,hp:4},
+    {id:'wing_l',label:'Asa E',icon:'🦅',x:'0%',y:'20%',w:'25%',h:'40%',dmgMult:1.1,maxHp:3,hp:3},
+  ],
+  anjanath:[
+    {id:'head',label:'Cabeça',icon:'💀',x:'30%',y:'2%',w:'40%',h:'35%',dmgMult:1.7,weakspot:true,maxHp:3,hp:3},
+    {id:'body',label:'Corpo',icon:'🦖',x:'15%',y:'35%',w:'65%',h:'38%',dmgMult:1.0,maxHp:5,hp:5},
+    {id:'tail',label:'Cauda',icon:'💜',x:'65%',y:'28%',w:'35%',h:'35%',dmgMult:1.4,maxHp:4,hp:4},
+    {id:'fang',label:'Presa',icon:'🦷',x:'20%',y:'52%',w:'30%',h:'20%',dmgMult:1.2,weakspot:true,maxHp:2,hp:2},
+  ],
+  default:[
+    {id:'body',label:'Corpo',icon:'🦎',x:'10%',y:'10%',w:'80%',h:'80%',dmgMult:1.0,maxHp:5,hp:5},
+  ],
+};
+
+const ENEMIES = {
+  jagras:{id:'jagras',name:'Jagras',icon:'🦎',hp:60,atk:10,def:2,w:80,h:80,
+    drops:[{id:'jagras-hide',qty:[1,2],c:.8},{id:'jagras-claw',qty:[1,1],c:.4}],svg:svgJagras},
+  girros:{id:'girros',name:'Girros',icon:'🦎',hp:70,atk:12,def:3,w:80,h:80,
+    drops:[{id:'girros-hide',qty:[1,2],c:.7},{id:'girros-fang',qty:[1,1],c:.5}],svg:svgGirros},
+  velocidrome:{id:'velocidrome',name:'Velocidrome',icon:'🦕',hp:65,atk:11,def:2,w:80,h:80,
+    drops:[{id:'velo-hide',qty:[1,2],c:.8},{id:'velo-fang',qty:[1,1],c:.45}],svg:svgVelocidrome},
+  kestidone:{id:'kestidone',name:'Kestidone',icon:'🦎',hp:80,atk:13,def:3,w:80,h:80,
+    poisonChance:.3,
+    drops:[{id:'kesti-hide',qty:[1,2],c:.75},{id:'kesti-sac',qty:[1,1],c:.5}],svg:svgKestidone},
+  grande_jargas:{id:'grande_jargas',name:'Grande Jargas',icon:'🐉',hp:450,atk:28,def:8,w:150,h:150,
+    isBoss:true,enrageAt:.4,
+    drops:[{id:'jargas-scale',qty:[2,4],c:1},{id:'jargas-hide',qty:[1,3],c:.9},{id:'jargas-claw+',qty:[1,2],c:.7},{id:'jargas-tail',qty:[1,1],c:.5},{id:'jargas-gem',qty:[1,1],c:.15},{id:'jargas-head',qty:[1,1],c:.4}],
+    svg:svgJargasBoss},
+  anjanath:{id:'anjanath',name:'Anjanath',icon:'🦖',hp:520,atk:32,def:10,w:160,h:160,
+    isBoss:true,enrageAt:.45,poisonAttack:true,poisonChance:.4,
+    drops:[{id:'anja-scale',qty:[2,4],c:1},{id:'anja-hide',qty:[1,3],c:.9},{id:'anja-fang',qty:[1,2],c:.75},{id:'anja-plate',qty:[1,1],c:.45},{id:'anja-tail',qty:[1,1],c:.5},{id:'anja-gem',qty:[1,1],c:.12}],
+    svg:svgAnjanath},
+};
+
+const MATERIALS={
+  'jagras-hide':{name:'Couro Jagras',icon:'🟤',r:1},'jagras-claw':{name:'Garra Jagras',icon:'🔸',r:1},
+  'girros-hide':{name:'Couro Girros',icon:'🟣',r:2},'girros-fang':{name:'Presa Girros',icon:'💜',r:2},
+  'jargas-scale':{name:'Escama Jargas',icon:'🟠',r:3},'jargas-hide':{name:'Couro Jargas',icon:'🔶',r:3},
+  'jargas-claw+':{name:'Garra Jargas+',icon:'🔴',r:4},'jargas-tail':{name:'Cauda Jargas',icon:'🐉',r:4},
+  'jargas-gem':{name:'Gema Jargas',icon:'💎',r:5},'jargas-head':{name:'Cabeça Jargas',icon:'💀',r:4},
+  'velo-hide':{name:'Couro Velo',icon:'🟢',r:1},'velo-fang':{name:'Presa Velo',icon:'🌿',r:1},
+  'kesti-hide':{name:'Couro Kesti',icon:'🔵',r:2},'kesti-sac':{name:'Saco Veneno',icon:'🫧',r:2},
+  'anja-scale':{name:'Escama Anja',icon:'🟪',r:3},'anja-hide':{name:'Couro Anja',icon:'🔮',r:3},
+  'anja-fang':{name:'Presa Anja',icon:'🦷',r:4},'anja-plate':{name:'Placa Anja',icon:'🛡️',r:4},
+  'anja-tail':{name:'Cauda Anja',icon:'💜',r:4},'anja-gem':{name:'Gema Anja',icon:'🔷',r:5},
+};
+
+const EQUIPMENT={
+  'jargas-gs':{id:'jargas-gs',slot:'weapon',name:'G.Espada Jargas',icon:'🗡️',r:5,set:'jargas',stats:{attack:42,fireAtk:20,affinity:10},mats:{'jargas-scale':3,'jargas-claw+':2,'jargas-head':1},desc:'Forjada com as garras do Dragão Ancião'},
+  'jargas-helm':{id:'jargas-helm',slot:'head',name:'Elmo Jargas',icon:'⛑️',r:4,set:'jargas',stats:{defense:38,fireRes:15,skill:'Res.Fogo Lv2'},mats:{'jargas-head':1,'jargas-scale':2,'jargas-hide':2},desc:'Elmo flamejante'},
+  'jargas-mail':{id:'jargas-mail',slot:'chest',name:'Peitoral Jargas',icon:'🦺',r:4,set:'jargas',stats:{defense:46,fireRes:20,skill:'Ataque Lv3'},mats:{'jargas-hide':3,'jargas-scale':3,'girros-hide':2},desc:'Carapaça dorsal'},
+  'jargas-vamb':{id:'jargas-vamb',slot:'arms',name:'Manoplas Jargas',icon:'🧤',r:4,set:'jargas',stats:{defense:32,fireRes:10,skill:'Espada Lv2'},mats:{'jargas-claw+':2,'jargas-scale':2,'jagras-claw':2},desc:'Garras moldadas'},
+  'jargas-coil':{id:'jargas-coil',slot:'waist',name:'Cinto Jargas',icon:'🎗️',r:4,set:'jargas',stats:{defense:28,fireRes:12,skill:'Crítico Lv2'},mats:{'jargas-tail':1,'jargas-hide':2,'girros-fang':2},desc:'Cauda como proteção'},
+  'jargas-grvs':{id:'jargas-grvs',slot:'legs',name:'Grevas Jargas',icon:'👢',r:4,set:'jargas',stats:{defense:34,fireRes:14,skill:'Constituição Lv2'},mats:{'jargas-scale':3,'jargas-gem':1,'jagras-hide':3},desc:'Patas couraçadas'},
+  'anja-bow':{id:'anja-bow',slot:'weapon',name:'Arco Anjanath',icon:'🏹',r:5,set:'anjanath',stats:{attack:38,poisonAtk:35,affinity:15},mats:{'anja-scale':3,'anja-fang':2,'anja-gem':1},desc:'Imbuído com veneno'},
+  'anja-helm':{id:'anja-helm',slot:'head',name:'Elmo Anjanath',icon:'🪖',r:4,set:'anjanath',stats:{defense:40,poisonRes:20,skill:'Veneno Atk Lv2'},mats:{'anja-fang':1,'anja-scale':2,'anja-hide':2},desc:'Mandíbulas como elmo'},
+  'anja-mail':{id:'anja-mail',slot:'chest',name:'Peitoral Anjanath',icon:'🥼',r:4,set:'anjanath',stats:{defense:48,poisonRes:25,skill:'Res.Veneno Lv3'},mats:{'anja-hide':3,'anja-plate':1,'kesti-hide':2},desc:'Couro denso'},
+  'anja-vamb':{id:'anja-vamb',slot:'arms',name:'Manoplas Anjanath',icon:'🫱',r:4,set:'anjanath',stats:{defense:34,poisonRes:15,skill:'Furtividade Lv2'},mats:{'anja-fang':2,'anja-scale':2,'velo-fang':2},desc:'Garras afiadas'},
+  'anja-coil':{id:'anja-coil',slot:'waist',name:'Cinto Anjanath',icon:'🪢',r:4,set:'anjanath',stats:{defense:30,poisonRes:18,skill:'Constituição Lv3'},mats:{'anja-tail':1,'anja-hide':2,'kesti-sac':2},desc:'Cauda venenosa'},
+  'anja-grvs':{id:'anja-grvs',slot:'legs',name:'Grevas Anjanath',icon:'🥾',r:4,set:'anjanath',stats:{defense:36,poisonRes:16,skill:'Crítico Lv3'},mats:{'anja-scale':3,'anja-gem':1,'velo-hide':3},desc:'Patas ágeis'},
+};
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+const G = {
+  scr:'s-title',
+  mission:null,
+  phase:0,
+  killCount:0,
+  runN:0,
+  enemy:null,          // live enemy data
+  parts:null,          // live part data
+  player:{
+    hp:150,maxHp:150,stm:100,maxStm:100,
+    atk:18,def:5,
+    x:0,               // position 0..1 in arena
+    potions:5,antidotes:3,flash:2,
+    dodgeActive:false,dodgeCd:0,
+    poisoned:false,poisonTick:0,
+  },
+  equip:{weapon:null,head:null,chest:null,arms:null,waist:null,legs:null},
+  inv:{},
+  cds:{atk:0,heavy:0,skill:0},
+  cdIv:{},
+  enemyX:0,            // 0..1
+  enemyDir:1,          // facing
+  aiTimer:null,
+  atkWarningTimer:null,
+  atkPending:false,
+  atkPendingDir:0,     // which side the attack comes from
+  poisonIv:null,
+  stmRegenIv:null,
+  arenaW:360,arenaH:200,
+};
+
+// ════════════════════════════════════════
+// SVG SPRITES
+// ════════════════════════════════════════
+function svgJagras(){return`<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="52" rx="22" ry="14" fill="#60a030"/><ellipse cx="40" cy="44" rx="16" ry="10" fill="#70b040"/><ellipse cx="40" cy="33" rx="13" ry="10" fill="#70b040"/><circle cx="32" cy="28" r="3.5" fill="#ff3000"/><circle cx="48" cy="28" r="3.5" fill="#ff3000"/><circle cx="32" cy="28" r="1.5" fill="#600000"/><circle cx="48" cy="28" r="1.5" fill="#600000"/><line x1="26" y1="58" x2="18" y2="70" stroke="#508020" stroke-width="4" stroke-linecap="round"/><line x1="34" y1="64" x2="30" y2="76" stroke="#508020" stroke-width="4" stroke-linecap="round"/><line x1="46" y1="64" x2="50" y2="76" stroke="#508020" stroke-width="4" stroke-linecap="round"/><line x1="54" y1="58" x2="62" y2="70" stroke="#508020" stroke-width="4" stroke-linecap="round"/><path d="M56 52 Q68 44 72 36" stroke="#508020" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M26 30 Q18 20 14 12" stroke="#508020" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M54 30 Q62 20 66 12" stroke="#508020" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`}
+function svgGirros(){return`<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="52" rx="22" ry="13" fill="#8040c0"/><ellipse cx="40" cy="44" rx="16" ry="10" fill="#9050d0"/><ellipse cx="40" cy="33" rx="13" ry="10" fill="#9050d0"/><circle cx="32" cy="28" r="3.5" fill="#ffff00"/><circle cx="48" cy="28" r="3.5" fill="#ffff00"/><circle cx="32" cy="28" r="1.5" fill="#806000"/><circle cx="48" cy="28" r="1.5" fill="#806000"/><path d="M33 37 Q40 42 47 37" stroke="#c060f0" stroke-width="2" fill="none"/><line x1="26" y1="58" x2="18" y2="70" stroke="#7030a0" stroke-width="4" stroke-linecap="round"/><line x1="34" y1="64" x2="30" y2="76" stroke="#7030a0" stroke-width="4" stroke-linecap="round"/><line x1="46" y1="64" x2="50" y2="76" stroke="#7030a0" stroke-width="4" stroke-linecap="round"/><line x1="54" y1="58" x2="62" y2="70" stroke="#7030a0" stroke-width="4" stroke-linecap="round"/><path d="M56 50 Q68 42 72 30 Q76 22 70 18" stroke="#7030a0" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M26 28 Q18 18 14 10" stroke="#7030a0" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M54 28 Q62 18 66 10" stroke="#7030a0" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`}
+function svgVelocidrome(){return`<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="54" rx="22" ry="13" fill="#309050"/><ellipse cx="40" cy="46" rx="16" ry="10" fill="#40a060"/><ellipse cx="40" cy="34" rx="14" ry="12" fill="#40a060"/><circle cx="32" cy="29" r="4" fill="#ff8000"/><circle cx="48" cy="29" r="4" fill="#ff8000"/><circle cx="32" cy="29" r="2" fill="#804000"/><circle cx="48" cy="29" r="2" fill="#804000"/><path d="M38 42 L36 54 L40 58 L44 54 L42 42Z" fill="#309050"/><line x1="26" y1="58" x2="18" y2="72" stroke="#208040" stroke-width="5" stroke-linecap="round"/><line x1="40" y1="66" x2="40" y2="78" stroke="#208040" stroke-width="5" stroke-linecap="round"/><line x1="54" y1="58" x2="62" y2="72" stroke="#208040" stroke-width="5" stroke-linecap="round"/><path d="M56 52 Q68 42 74 30" stroke="#208040" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M28 32 Q20 22 14 14" stroke="#208040" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M52 32 Q60 22 66 14" stroke="#208040" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`}
+function svgKestidone(){return`<svg width="80" height="80" viewBox="0 0 80 80"><ellipse cx="40" cy="54" rx="22" ry="13" fill="#206080"/><ellipse cx="40" cy="45" rx="16" ry="10" fill="#307090"/><ellipse cx="40" cy="34" rx="13" ry="11" fill="#307090"/><circle cx="32" cy="29" r="4" fill="#60ff80"/><circle cx="48" cy="29" r="4" fill="#60ff80"/><circle cx="32" cy="29" r="2" fill="#008020"/><circle cx="48" cy="29" r="2" fill="#008020"/><path d="M32 42 Q40 50 48 42" stroke="#40c080" stroke-width="2" fill="none"/><line x1="26" y1="58" x2="18" y2="70" stroke="#105060" stroke-width="4" stroke-linecap="round"/><line x1="34" y1="64" x2="30" y2="76" stroke="#105060" stroke-width="4" stroke-linecap="round"/><line x1="46" y1="64" x2="50" y2="76" stroke="#105060" stroke-width="4" stroke-linecap="round"/><line x1="54" y1="58" x2="62" y2="70" stroke="#105060" stroke-width="4" stroke-linecap="round"/><path d="M56 52 Q68 44 72 34 Q76 26 70 22" stroke="#105060" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="30" cy="56" r="5" fill="#40ff80" opacity=".2"/><circle cx="50" cy="56" r="5" fill="#40ff80" opacity=".2"/></svg>`}
+function svgJargasBoss(){return`<svg width="150" height="150" viewBox="0 0 150 150"><ellipse cx="75" cy="100" rx="42" ry="28" fill="#c06010"/><ellipse cx="75" cy="88" rx="36" ry="22" fill="#d07018"/><path d="M42 88 Q75 68 108 88" stroke="#f0a030" stroke-width="2.5" fill="none"/><path d="M46 96 Q75 78 104 96" stroke="#f0a030" stroke-width="2" fill="none"/><line x1="46" y1="108" x2="32" y2="130" stroke="#b05010" stroke-width="7" stroke-linecap="round"/><line x1="60" y1="120" x2="52" y2="140" stroke="#b05010" stroke-width="6" stroke-linecap="round"/><line x1="90" y1="120" x2="98" y2="140" stroke="#b05010" stroke-width="6" stroke-linecap="round"/><line x1="104" y1="108" x2="118" y2="130" stroke="#b05010" stroke-width="7" stroke-linecap="round"/><ellipse cx="75" cy="62" rx="26" ry="20" fill="#d07018"/><circle cx="62" cy="56" r="7.5" fill="#ff2000"/><circle cx="88" cy="56" r="7.5" fill="#ff2000"/><circle cx="62" cy="56" r="3.5" fill="#800000"/><circle cx="88" cy="56" r="3.5" fill="#800000"/><circle cx="60" cy="54" r="1.5" fill="white" opacity=".9"/><circle cx="86" cy="54" r="1.5" fill="white" opacity=".9"/><path d="M53 52 Q38 32 28 22" stroke="#c06010" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M97 52 Q112 32 122 22" stroke="#c06010" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M60 78 Q67 92 75 84 Q83 92 90 78" fill="#ff6010" opacity=".9"/><path d="M65 80 Q75 96 85 80" fill="#ffaa20" opacity=".7"/><path d="M116 100 Q132 82 140 64 Q146 50 134 44" stroke="#b05010" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M132 44 L144 34 L132 52Z" fill="#d07018"/><path d="M46 84 Q24 64 18 44 Q34 52 46 72" fill="#a04008" opacity=".85"/><path d="M104 84 Q126 64 132 44 Q116 52 104 72" fill="#a04008" opacity=".85"/><path d="M58 82 L52 64 L62 80" fill="#e07020"/><path d="M75 80 L72 60 L80 80" fill="#e07020"/><path d="M92 82 L98 64 L88 80" fill="#e07020"/></svg>`}
+function svgAnjanath(){return`<svg width="160" height="160" viewBox="0 0 160 160"><ellipse cx="80" cy="112" rx="44" ry="30" fill="#6030a0"/><ellipse cx="80" cy="98" rx="38" ry="24" fill="#7040b0"/><path d="M46 98 Q80 76 114 98" stroke="#a060e0" stroke-width="2.5" fill="none"/><path d="M50 107 Q80 87 110 107" stroke="#a060e0" stroke-width="2" fill="none"/><line x1="48" y1="122" x2="34" y2="146" stroke="#5020a0" stroke-width="8" stroke-linecap="round"/><line x1="64" y1="134" x2="56" y2="154" stroke="#5020a0" stroke-width="7" stroke-linecap="round"/><line x1="96" y1="134" x2="104" y2="154" stroke="#5020a0" stroke-width="7" stroke-linecap="round"/><line x1="112" y1="122" x2="126" y2="146" stroke="#5020a0" stroke-width="8" stroke-linecap="round"/><ellipse cx="80" cy="70" rx="30" ry="24" fill="#7040b0"/><circle cx="66" cy="62" r="9" fill="#40ff80"/><circle cx="94" cy="62" r="9" fill="#40ff80"/><circle cx="66" cy="62" r="4.5" fill="#006020"/><circle cx="94" cy="62" r="4.5" fill="#006020"/><circle cx="64" cy="60" r="2" fill="white" opacity=".9"/><circle cx="92" cy="60" r="2" fill="white" opacity=".9"/><path d="M57 58 Q40 38 28 24" stroke="#5020a0" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M103 58 Q120 38 132 24" stroke="#5020a0" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M66 88 Q73 104 80 96 Q87 104 94 88" fill="#80ff80" opacity=".7"/><path d="M71 90 Q80 106 89 90" fill="#40d060" opacity=".6"/><path d="M124 112 Q140 92 148 72 Q154 56 140 50" stroke="#5020a0" stroke-width="9" fill="none" stroke-linecap="round"/><path d="M138 50 L152 40 L140 58Z" fill="#7040b0"/><path d="M50 92 Q28 70 20 48 Q38 58 50 78" fill="#4a1a80" opacity=".85"/><path d="M110 92 Q132 70 140 48 Q122 58 110 78" fill="#4a1a80" opacity=".85"/><path d="M62 92 L56 72 L66 90" fill="#9060d0"/><path d="M80 90 L76 68 L84 90" fill="#9060d0"/><path d="M98 92 L104 72 L94 90" fill="#9060d0"/><ellipse cx="80" cy="116" rx="12" ry="6" fill="#40ff80" opacity=".12"/></svg>`}
+
+// ════════════════════════════════════════
+// SCREEN
+// ════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  G.scr=id;
+}
+
+// ════════════════════════════════════════
+// MISSIONS
+// ════════════════════════════════════════
+function renderMissions(){
+  const list=document.getElementById('m-list');list.innerHTML='';
+  Object.values(MISSIONS).forEach(m=>{
+    const card=document.createElement('div');card.className='m-card';
+    const stars=Array(5).fill(0).map((_,i)=>`<span class="m-star${i<m.stars?' lit':''}">★</span>`).join('');
+    const tags=m.tags.map((t,i)=>`<span class="m-tag ${t}">${m.tagLabels[i]}</span>`).join('');
+    card.innerHTML=`<div class="m-card-top"><div class="m-icon">${m.icon}</div><div class="m-info"><div class="m-name">${m.name}</div><div class="m-loc">${m.location}</div><div class="m-stars">${stars}</div></div></div><div class="m-card-bot">${tags}</div>`;
+    card.onclick=()=>startMission(m.id);list.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════
+// ARENA GEOMETRY
+// ════════════════════════════════════════
+function getArenaRect(){
+  const a=document.getElementById('arena');
+  G.arenaW=a.clientWidth||360;G.arenaH=a.clientHeight||200;
+}
+
+function placePlayer(){
+  const el=document.getElementById('player-el');
+  const x=G.player.x*G.arenaW;
+  el.style.left=(x-26)+'px';
+}
+
+function placeEnemy(){
+  const el=document.getElementById('enemy-el');
+  const def=G.enemy;
+  if(!def)return;
+  const x=G.enemyX*G.arenaW;
+  el.style.left=(x-def.w/2)+'px';
+  // face player
+  const facingLeft=G.player.x < G.enemyX;
+  el.style.transform=facingLeft?'scaleX(-1)':'scaleX(1)';
+}
+
+// ════════════════════════════════════════
+// MISSION START
+// ════════════════════════════════════════
+function startMission(id){
+  G.mission=MISSIONS[id];
+  G.phase=0;G.killCount=0;G.runN++;
+  resetPlayer();clearPoisonIv();stopAI();
+  document.getElementById('q-label').textContent='☆ '+G.mission.name;
+  document.getElementById('arena-sky').style.background=G.mission.skyColor;
+  buildTimeline();clearLog();
+  showScreen('s-fight');
+  setTimeout(()=>{getArenaRect();loadPhase(0);},80);
+}
+
+function retryHunt(){if(G.mission)startMission(G.mission.id);}
+
+function resetPlayer(){
+  const def=equipDef();
+  G.player.maxHp=150+def;G.player.hp=G.player.maxHp;
+  G.player.maxStm=100;G.player.stm=100;
+  G.player.atk=18+equipAtk();G.player.def=5+Math.floor(def*.08);
+  G.player.potions=5;G.player.antidotes=3;G.player.flash=2;
+  G.player.x=0.2;
+  G.player.dodgeActive=false;G.player.dodgeCd=0;
+  G.player.poisoned=false;
+  G.cds={atk:0,heavy:0,skill:0};
+  updateItemHUD();updatePlayerHUD();
+  document.getElementById('hp-bar').classList.remove('psn');
+  document.getElementById('psn-vignette').classList.remove('active');
+}
+
+function equipAtk(){const w=G.equip.weapon;return w?(EQUIPMENT[w]?.stats?.attack||0)-18:0;}
+function equipDef(){let d=0;['head','chest','arms','waist','legs'].forEach(s=>{const e=G.equip[s];if(e)d+=EQUIPMENT[e]?.stats?.defense||0;});return d;}
+function updateItemHUD(){
+  document.getElementById('pot-n').textContent=G.player.potions;
+  document.getElementById('anti-n').textContent=G.player.antidotes;
+  document.getElementById('flash-n').textContent=G.player.flash;
+}
+
+// ════════════════════════════════════════
+// PHASE LOADING
+// ════════════════════════════════════════
+function loadPhase(phase){
+  G.phase=phase;stopAI();
+  const phases=G.mission.phases;
+  if(phase>=phases.length)return;
+  const ph=phases[phase];
+  const baseDef=ENEMIES[ph.e];
+const scale=1+(G.runN-1)*0.12;
+G.enemy={...JSON.parse(JSON.stringify(baseDef)),hp:Math.floor(baseDef.hp*scale),maxHp:Math.floor(baseDef.hp*scale),enraged:false};
+// Restaura a função svg que foi perdida no JSON.stringify
+G.enemy.svg = baseDef.svg; 
+// Parts
+  const ptDef=PARTS_DEF[ph.e]||PARTS_DEF.default;
+  G.parts=JSON.parse(JSON.stringify(ptDef));
+  G.enemyX=0.78;
+  updateTimeline();renderEnemy();updateEnemyHUD();renderPartBtns();updatePlayerHUD();
+  document.getElementById('e-phase').textContent=`${phase+1}/${phases.length}`;
+  if(G.enemy.isBoss){
+    const m=G.mission;
+    document.getElementById('bi-eye').textContent=m.bossEye;
+    document.getElementById('bi-name').textContent=G.enemy.name.toUpperCase();
+    document.getElementById('bi-icon').textContent=m.bossIcon;
+    const bi=document.getElementById('boss-intro');bi.classList.add('on');
+    setTimeout(()=>{bi.classList.remove('on');startAI();addLog(`🔥 ${G.enemy.name} desceu!`,'sys');},2800);
+  } else {
+    addLog(`⚔️ ${G.enemy.name} apareceu!`,'sys');startAI();
+  }
+}
+
+function renderEnemy(){
+  const el=document.getElementById('enemy-el');
+  el.innerHTML='';
+  const def=G.enemy;
+  el.style.width=def.w+'px';el.style.height=def.h+'px';
+  el.style.position='absolute';el.style.bottom='32%';
+  // SVG
+  el.insertAdjacentHTML('beforeend',def.svg());
+  // Part zones
+  const pd=PARTS_DEF[def.id]||PARTS_DEF.default;
+  pd.forEach((p,i)=>{
+    const zone=document.createElement('div');
+    zone.className='part-zone';
+    zone.id='zone-'+p.id;
+    zone.style.left=p.x;zone.style.top=p.y;
+    zone.style.width=p.w;zone.style.height=p.h;
+    zone.title=p.label;
+    el.appendChild(zone);
+  });
+  // Enrage indicator
+  const enr=document.createElement('div');
+  enr.id='enrage-ind';
+  enr.style.cssText='position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none';
+  enr.textContent=def.id==='anjanath'?'☠️':'🔥';
+  el.appendChild(enr);
+  placeEnemy();
+}
+
+function renderPartBtns(){
+  const wrap=document.getElementById('part-btns');wrap.innerHTML='';
+  if(!G.parts)return;
+  G.parts.forEach(p=>{
+    const btn=document.createElement('button');
+    btn.className=`part-btn${p.weakspot?' weakspot':''}`;
+    btn.id='pbtn-'+p.id;
+    const hpPct=p.hp/p.maxHp*100;
+    btn.innerHTML=`<span class="part-icon">${p.icon}</span><span style="font-size:7px">${p.label}</span><div class="part-hp-mini"><div class="part-hp-fill" id="php-${p.id}" style="width:${hpPct}%"></div></div>`;
+    btn.onclick=()=>doAttackPart(p.id);
+    wrap.appendChild(btn);
+  });
+}
+
+// ════════════════════════════════════════
+// PLAYER HUD
+// ════════════════════════════════════════
+function updatePlayerHUD(){
+  const p=G.player;
+  document.getElementById('hp-bar').style.width=Math.max(0,p.hp/p.maxHp*100)+'%';
+  document.getElementById('hp-val').textContent=p.hp+'/'+p.maxHp;
+  document.getElementById('stm-bar').style.width=Math.max(0,p.stm/p.maxStm*100)+'%';
+  document.getElementById('stm-val').textContent=Math.floor(p.stm)+'/'+p.maxStm;
+}
+
+function updateEnemyHUD(){
+  const e=G.enemy;if(!e)return;
+  document.getElementById('e-name').textContent=e.name;
+  document.getElementById('e-hp-bar').style.width=Math.max(0,e.hp/e.maxHp*100)+'%';
+  if(e.isBoss&&!e.enraged&&e.hp/e.maxHp<=e.enrageAt){
+    e.enraged=true;e.atk=Math.floor(e.atk*1.4);
+    document.getElementById('enrage-ind').style.opacity='1';
+    addEStatus('enrage','🔥 FÚRIA');addLog('🔥 '+e.name+' entrou em fúria! ATQ +40%','sys');
+    showNotif('⚠️ FÚRIA ATIVADA');
+  }
+}
+
+// ════════════════════════════════════════
+// AI ENGINE
+// ════════════════════════════════════════
+const AI_ATTACKS = {
+  default:[
+    {name:'Avanço',warn:'⚠ AVANÇO!',cd:1800,prep:1000,dmgMult:1.0,side:'front',moveToPlayer:true},
+    {name:'Mordida',warn:'⚠ MORDIDA!',cd:2200,prep:800,dmgMult:1.2,side:'front',moveToPlayer:true},
+    {name:'Cauda',warn:'⚠ CAUDA!',cd:3000,prep:900,dmgMult:0.9,side:'back',moveToPlayer:false},
+  ],
+  grande_jargas:[
+    {name:'Avanço de Fogo',warn:'⚠ FOGO!',cd:1600,prep:900,dmgMult:1.1,side:'front',moveToPlayer:true,enrageMult:1.3},
+    {name:'Sopro de Chama',warn:'⚠ SOPRO!',cd:2800,prep:1200,dmgMult:1.5,side:'front',moveToPlayer:true,enrageMult:1.5},
+    {name:'Chicote de Cauda',warn:'⚠ CAUDA!',cd:3200,prep:800,dmgMult:0.9,side:'back',moveToPlayer:false},
+    {name:'Carga',warn:'⚠ CARGA!',cd:2000,prep:700,dmgMult:1.3,side:'any',moveToPlayer:true,charge:true},
+  ],
+  anjanath:[
+    {name:'Mordida Venenosa',warn:'☠ VENENO!',cd:1800,prep:900,dmgMult:1.0,side:'front',moveToPlayer:true,poison:true},
+    {name:'Pisão',warn:'⚠ PISÃO!',cd:2500,prep:700,dmgMult:1.2,side:'any',moveToPlayer:false},
+    {name:'Avanço',warn:'⚠ AVANÇO!',cd:2000,prep:800,dmgMult:1.1,side:'front',moveToPlayer:true,charge:true},
+    {name:'Rugido',warn:'♦ RUGIDO!',cd:4000,prep:1500,dmgMult:0,side:'any',roar:true},
+  ],
+};
+
+let aiTick=0;
+function startAI(){
+  stopAI();aiTick=0;
+  scheduleNextAI();
+}
+function stopAI(){if(G.aiTimer){clearTimeout(G.aiTimer);G.aiTimer=null;}cancelWarning();}
+
+function scheduleNextAI(){
+  if(G.scr!=='s-fight')return;
+  const e=G.enemy;if(!e||e.hp<=0)return;
+  const atksPool=(AI_ATTACKS[e.id]||AI_ATTACKS.default);
+  const coolBase=e.isBoss?1400:1800;
+  const delay=coolBase+rand(0,800);
+  G.aiTimer=setTimeout(()=>runAIMove(atksPool),delay);
+}
+
+function runAIMove(pool){
+  if(!G.enemy||G.enemy.hp<=0)return;
+  // Occasionally patrol (move without attacking)
+  if(Math.random()<.25){doEnemyPatrol();return;}
+  // Pick random attack
+  const atk=pool[rand(0,pool.length-1)];
+  // Move toward player if needed
+  if(atk.moveToPlayer||atk.charge){
+    animateEnemyMove(G.player.x+(Math.random()<.5?.1:-.1),300,()=>launchAttack(atk));
+  } else {
+    launchAttack(atk);
+  }
+}
+
+function doEnemyPatrol(){
+  // Wander to a random spot
+  const target=0.3+Math.random()*0.5;
+  animateEnemyMove(target,500,()=>scheduleNextAI());
+}
+
+function animateEnemyMove(targetX,dur,cb){
+  const start=G.enemyX;const end=Math.max(.05,Math.min(.95,targetX));
+  const startTime=performance.now();
+  function step(now){
+    const t=Math.min((now-startTime)/dur,1);
+    G.enemyX=start+(end-start)*t;
+    placeEnemy();
+    if(t<1)requestAnimationFrame(step);else{G.enemyX=end;placeEnemy();if(cb)cb();}
+  }
+  requestAnimationFrame(step);
+}
+
+function launchAttack(atk){
+  if(!G.enemy||G.enemy.hp<=0)return;
+  G.atkPending=true;
+  G.atkPendingDir=atk.side;
+  // Show warning
+  const warnEl=document.getElementById('atk-warning');
+  warnEl.textContent=atk.warn;
+  const ex=G.enemyX*G.arenaW;
+  warnEl.style.left=ex+'px';
+  warnEl.style.bottom=(G.arenaH*.35+G.enemy.h+8)+'px';
+  warnEl.classList.add('show');
+  // Show dodge hints
+  showDodgeHints(atk.side);
+  // Animate enemy
+  const el=document.getElementById('enemy-el');
+  if(atk.charge)el.classList.add('enemy-charge');
+  else if(atk.roar)el.classList.add('enemy-roar');
+  setTimeout(()=>{el.classList.remove('enemy-charge','enemy-roar');},600);
+  G.atkWarningTimer=setTimeout(()=>{resolveEnemyAttack(atk);},atk.prep);
+}
+
+function showDodgeHints(side){
+  const l=document.getElementById('dh-left'),r=document.getElementById('dh-right');
+  l.classList.remove('show');r.classList.remove('show');
+  if(side==='front'){
+    // Attack from enemy direction — dodge away from enemy
+    if(G.enemyX>G.player.x){l.classList.add('show');}else{r.classList.add('show');}
+  } else if(side==='back'){
+    if(G.enemyX>G.player.x){r.classList.add('show');}else{l.classList.add('show');}
+  } else {
+    l.classList.add('show');r.classList.add('show');
+  }
+  setTimeout(()=>{l.classList.remove('show');r.classList.remove('show');},1200);
+}
+
+function cancelWarning(){
+  document.getElementById('atk-warning').classList.remove('show');
+  document.getElementById('dh-left').classList.remove('show');
+  document.getElementById('dh-right').classList.remove('show');
+  G.atkPending=false;
+  if(G.atkWarningTimer){clearTimeout(G.atkWarningTimer);G.atkWarningTimer=null;}
+}
+
+function resolveEnemyAttack(atk){
+  cancelWarning();
+  if(!G.enemy||G.enemy.hp<=0)return;
+  // Roar = just locks buttons briefly
+  if(atk.roar){
+    addLog('🦖 '+G.enemy.name+' rugiu! Botões travados...','sys');
+    lockAllBtns(1500);scheduleNextAI();return;
+  }
+  // Did player dodge away from the attack side?
+  if(G.player.dodgeActive){
+    G.player.dodgeActive=false;
+    addLog('💨 Esquivou de "'+atk.name+'"!','sys');
+    scheduleNextAI();return;
+  }
+  // Check distance — if player far enough, miss
+  const dist=Math.abs(G.player.x-G.enemyX);
+  const hitRange=G.enemy.isBoss?.35:.28;
+  if(dist>hitRange){
+    addLog('💨 '+atk.name+' errou! Distância salva.','sys');
+    scheduleNextAI();return;
+  }
+  // Hit!
+  let dmgMult=atk.dmgMult*(atk.enrageMult&&G.enemy.enraged?atk.enrageMult:1);
+  let dmg=Math.floor(G.enemy.atk*dmgMult*(0.8+Math.random()*.4));
+  dmg=Math.max(1,dmg-G.player.def);
+  G.player.hp=Math.max(0,G.player.hp-dmg);
+  addLog(`🩸 ${G.enemy.name} usou "${atk.name}": -${dmg} HP`,'pdmg');
+  floatLabel(G.player.x*G.arenaW,G.arenaH*.55,`-${dmg}`,14,'#ff6040');
+  animateClass(document.getElementById('player-el'),'hit-anim',400);
+  updatePlayerHUD();
+  // Poison
+  if(atk.poison&&!G.player.poisoned&&Math.random()<G.enemy.poisonChance){inflictPoison();}
+  if(G.player.hp<=0){onPlayerDeath();return;}
+  scheduleNextAI();
+}
+
+function lockAllBtns(ms){
+  ['btn-atk','btn-heavy','btn-skill','btn-dl','btn-dr'].forEach(id=>{
+    const b=document.getElementById(id);if(b){b.disabled=true;setTimeout(()=>b.disabled=false,ms);}
+  });
+}
+
+// ════════════════════════════════════════
+// PLAYER ATTACKS
+// ════════════════════════════════════════
+function doAttack(type){
+  if(!G.enemy||G.enemy.hp<=0)return;
+  const cdKey=type==='heavy'?'heavy':type==='skill'?'skill':'atk';
+  if(G.cds[cdKey]>0)return;
+  const stmCost=type==='skill'?40:type==='heavy'?25:0;
+  if(G.player.stm<stmCost){addLog('⚠️ Stamina insuficiente!','sys');return;}
+  // Check range
+  const dist=Math.abs(G.player.x-G.enemyX);
+  const range=G.enemy.isBoss?.45:.38;
+  if(dist>range){addLog('⚠ Muito longe! Aproxime-se.','sys');return;}
+  G.player.stm=Math.max(0,G.player.stm-stmCost);
+  const crit=Math.random()<(type==='skill'?.25:.15);
+  let baseMult=type==='heavy'?1.9:type==='skill'?2.4:1.0;
+  let dmg=Math.floor((G.player.atk+rand(2,8))*baseMult*(crit?1.8:1));
+  const part=G.parts?.find(p=>p.id==='body');
+  const partMult=part?1.0:1.0;
+  dmg=Math.max(1,Math.floor(dmg*partMult)-(G.enemy.def||0));
+  dealDmgToEnemy(dmg,crit,'body');
+  animateClass(document.getElementById('player-el'),'attack-anim',280);
+  const cd=type==='skill'?5.5:type==='heavy'?2.2:.7;
+  setCd(cdKey,cd);
+  updatePlayerHUD();
+}
+
+function doAttackPart(partId){
+  if(!G.enemy||G.enemy.hp<=0)return;
+  if(G.cds.atk>0)return;
+  const dist=Math.abs(G.player.x-G.enemyX);
+  const range=G.enemy.isBoss?.48:.40;
+  if(dist>range){addLog('⚠ Muito longe para atacar a parte!','sys');return;}
+  const part=G.parts?.find(p=>p.id===partId);if(!part)return;
+  const crit=Math.random()<(part.weakspot?.28:.15);
+  let dmg=Math.floor((G.player.atk+rand(2,10))*part.dmgMult*(crit?1.8:1));
+  dmg=Math.max(1,dmg-(G.enemy.def||0));
+  dealDmgToEnemy(dmg,crit,partId);
+  animateClass(document.getElementById('player-el'),'attack-anim',280);
+  setCd('atk',.7);
+  updatePlayerHUD();
+}
+
+function dealDmgToEnemy(dmg,crit,partId){
+  G.enemy.hp=Math.max(0,G.enemy.hp-dmg);
+  animateClass(document.getElementById('enemy-el'),'enemy-hit',350);
+  floatLabel(G.enemyX*G.arenaW,G.arenaH*.25,crit?`💥 ${dmg}!`:`-${dmg}`,crit?20:15,crit?'#f0d080':'#e06040');
+  addLog(`⚔️${crit?' CRÍTICO!':''} ${partId==='body'?'':'['+partId+'] '}${dmg} de dano`,crit?'crit':'dmg');
+  // Part damage
+  if(partId!=='body'){
+    const part=G.parts?.find(p=>p.id===partId);
+    if(part&&part.hp>0){
+      part.hp=Math.max(0,part.hp-1);
+      const fill=document.getElementById('php-'+partId);
+      if(fill)fill.style.width=(part.hp/part.maxHp*100)+'%';
+      if(part.hp<=0&&!part.broken){
+        part.broken=true;
+        const pbtn=document.getElementById('pbtn-'+partId);
+        if(pbtn)pbtn.classList.add('broken');
+        const zone=document.getElementById('zone-'+partId);
+        if(zone)zone.classList.add('broken');
+        showPartBroken(partId,part.label);
+      }
+    }
+  }
+  updateEnemyHUD();
+  if(G.enemy.hp<=0)setTimeout(onEnemyDeath,400);
+}
+
+function showPartBroken(partId,label){
+  const arena=document.getElementById('arena');
+  const el=document.createElement('div');el.className='part-broken-flash';
+  el.textContent='✕ '+label.toUpperCase()+' QUEBRADO';
+  el.style.left=(G.enemyX*G.arenaW)+'px';
+  el.style.bottom=(G.arenaH*.45)+'px';
+  arena.appendChild(el);setTimeout(()=>el.remove(),1600);
+  addLog('🔴 Parte quebrada: '+label+'!','part');
+}
+
+// ════════════════════════════════════════
+// DODGE
+// ════════════════════════════════════════
+function doDodge(dir){// dir: -1=left, 1=right
+  if(G.player.dodgeCd>0)return;
+  if(G.player.stm<15){addLog('⚠️ Stamina insuficiente!','sys');return;}
+  G.player.stm=Math.max(0,G.player.stm-15);
+  G.player.dodgeActive=true;
+  G.player.x=Math.max(.02,Math.min(.98,G.player.x+dir*.18));
+  const cl=dir<0?'dodge-left':'dodge-right';
+  animateClass(document.getElementById('player-el'),cl,230);
+  placePlayer();
+  addLog(dir<0?'← Esquivou para a esquerda!':'→ Esquivou para a direita!','sys');
+  // Dodge window 600ms
+  G.player.dodgeCd=1;
+  setTimeout(()=>{G.player.dodgeActive=false;},600);
+  setTimeout(()=>{G.player.dodgeCd=0;},900);
+  updatePlayerHUD();
+}
+
+// ════════════════════════════════════════
+// ITEMS
+// ════════════════════════════════════════
+function usePotion(){
+  if(G.player.potions<=0){addLog('❌ Sem poções!','sys');return;}
+  const h=rand(30,50);G.player.hp=Math.min(G.player.maxHp,G.player.hp+h);
+  G.player.potions--;floatLabel(G.player.x*G.arenaW,G.arenaH*.4,'+'+h+' HP',14,'#4aaa4a');
+  addLog('🧪 Poção: +'+h+' HP','sys');updatePlayerHUD();updateItemHUD();
+}
+function useAntidote(){
+  if(G.player.antidotes<=0){addLog('❌ Sem antídotos!','sys');return;}
+  if(!G.player.poisoned){addLog('ℹ️ Não está envenenado.','sys');return;}
+  G.player.poisoned=false;clearPoisonIv();
+  document.getElementById('hp-bar').classList.remove('psn');
+  document.getElementById('psn-vignette').classList.remove('active');
+  G.player.antidotes--;addLog('🌿 Veneno curado!','psn');updatePlayerHUD();updateItemHUD();
+}
+function useFlash(){
+  if(G.player.flash<=0||!G.enemy){addLog('❌ Sem bombas flash!','sys');return;}
+  G.player.flash--;updateItemHUD();stopAI();
+  addEStatus('stun','💥 ATORDOADO');addLog('💥 Flash! Inimigo atordoado 4s.','sys');
+  const origAtk=G.enemy.atk;G.enemy.atk=0;
+  setTimeout(()=>{if(G.enemy)G.enemy.atk=origAtk;removeEStatus('stun');startAI();},4000);
+}
+
+// ════════════════════════════════════════
+// POISON
+// ════════════════════════════════════════
+function inflictPoison(){
+  G.player.poisoned=true;
+  document.getElementById('hp-bar').classList.add('psn');
+  document.getElementById('psn-vignette').classList.add('active');
+  addLog('☠️ Envenenado! Use Antídoto!','psn');showNotif('☠️ ENVENENADO!');
+  clearPoisonIv();
+  G.poisonIv=setInterval(()=>{
+    if(!G.player.poisoned){clearPoisonIv();return;}
+    const d=rand(4,9);G.player.hp=Math.max(0,G.player.hp-d);
+    floatLabel(G.player.x*G.arenaW,G.arenaH*.5,'☠-'+d,12,'#c080f0');
+    addLog('☠️ Veneno: -'+d+' HP','psn');updatePlayerHUD();
+    if(G.player.hp<=0)onPlayerDeath();
+  },2200);
+}
+function clearPoisonIv(){if(G.poisonIv){clearInterval(G.poisonIv);G.poisonIv=null;}}
+
+// ════════════════════════════════════════
+// DEATH / KILL
+// ════════════════════════════════════════
+function onPlayerDeath(){
+  stopAI();clearPoisonIv();
+  document.getElementById('ds-sub').textContent=G.enemy?.id==='anjanath'?'"O veneno do Anjanath apagou sua consciência..."':'"O Jargas rugiu sobre sua silhueta caída..."';
+  addLog('💀 Você desmaiou...','sys');
+  setTimeout(()=>showScreen('s-death'),900);
+}
+
+function onEnemyDeath(){
+  stopAI();clearPoisonIv();G.player.poisoned=false;
+  document.getElementById('hp-bar').classList.remove('psn');
+  document.getElementById('psn-vignette').classList.remove('active');
+  G.killCount++;addLog('✅ '+G.enemy.name+' eliminado!','sys');
+  const drops=rollDrops(G.enemy);drops.forEach(d=>addInv(d.id,d.qty));
+  // Bonus drops for broken parts
+  if(G.parts){
+    G.parts.filter(p=>p.broken).forEach(p=>{
+      const bonus=getBonusDrop(p.id);
+      if(bonus){addInv(bonus.id,bonus.qty);drops.push(bonus);addLog('🔴 Drop de parte: '+bonus.id,'part');}
+    });
+  }
+  showRewardScreen(G.enemy,drops);
+}
+
+// Substituindo a função original do jogo para suportar mods dinamicamente
+function getBonusDrop(partId){
+  const eId = G.enemy?.id;
+  if(!eId) return null;
+  
+  let dropId = null;
+  
+  // Lógica Dinâmica para os Customizados
+  if(partId === 'head') dropId = eId + '-head';
+  else if(partId === 'tail') dropId = eId + '-tail';
+  else if(partId === 'limbs') dropId = eId + '-claw';
+  
+  // Tratamento especial de compatibilidade para os monstros originais
+  if(eId === 'grande_jargas' && partId === 'head') dropId = 'jargas-head';
+  if(eId === 'grande_jargas' && partId === 'tail') dropId = 'jargas-tail';
+  if(eId === 'anjanath' && partId === 'head') dropId = 'anja-fang'; 
+  if(eId === 'anjanath' && partId === 'fang') dropId = 'anja-fang';
+  if(eId === 'anjanath' && partId === 'tail') dropId = 'anja-tail';
+
+  // Verifica se o material de fato existe na base e rola 70% de chance de vir
+  if(dropId && MATERIALS[dropId]) {
+    return Math.random() < 0.70 ? {id: dropId, qty: 1} : null;
+  }
+  
+  return null;
+}
+
+function rollDrops(e){
+  const drops=[];
+  e.drops.forEach(d=>{if(Math.random()<d.c)drops.push({id:d.id,qty:rand(d.qty[0],d.qty[1])});});
+  if(!drops.length&&e.drops.length)drops.push({id:e.drops[0].id,qty:e.drops[0].qty[0]});
+  return drops;
+}
+function addInv(id,qty){G.inv[id]=(G.inv[id]||0)+qty;}
+
+// ════════════════════════════════════════
+// REWARD SCREEN
+// ════════════════════════════════════════
+function showRewardScreen(enemy,drops){
+  document.getElementById('rw-icon').textContent=enemy.isBoss?(G.mission.id==='anjanath'?'🦖':'🐉'):'💀';
+  document.getElementById('rw-name').textContent=enemy.name;
+  const list=document.getElementById('rw-list');list.innerHTML='';
+  drops.forEach((d,i)=>{
+    const mat=MATERIALS[d.id]||{name:d.id,icon:'📦',r:1};
+    const el=document.createElement('div');el.className=`rw-item r${mat.r}`;
+    el.style.animationDelay=(i*.09)+'s';
+    el.innerHTML=`<span class="ri-icon">${mat.icon}</span><div class="ri-info"><div class="ri-name">${mat.name}</div><div class="ri-desc">${['Comum','Incomum','Raro','Muito Raro','Lendário'][mat.r-1]}</div></div><span class="ri-qty">x${d.qty}</span>`;
+    list.appendChild(el);
+  });
+  const btns=document.getElementById('rw-btns');btns.innerHTML='';
+  const ph=G.mission.phases;const next=G.phase+1;
+  if(next<ph.length){
+    const b=document.createElement('button');b.className='btn-p';
+    b.textContent='◆ CONTINUAR → '+ENEMIES[ph[next].e].icon+' '+ENEMIES[ph[next].e].name;
+    b.onclick=()=>{showScreen('s-fight');setTimeout(()=>{getArenaRect();loadPhase(next);},80);};
+    btns.appendChild(b);
+  } else {
+    const fb=document.createElement('button');fb.className='btn-p';fb.textContent='🔨 IR À FERRARIA';
+    fb.onclick=()=>{showScreen('s-forge');renderForge();};btns.appendChild(fb);
+    const hb=document.createElement('button');hb.className='btn-s';hb.textContent='↩ CAÇAR NOVAMENTE';
+    hb.onclick=()=>startMission(G.mission.id);btns.appendChild(hb);
+    const mb=document.createElement('button');mb.className='btn-s';mb.textContent='◆ MISSÕES';
+    mb.onclick=()=>{showScreen('s-mission');renderMissions();};btns.appendChild(mb);
+  }
+  showScreen('s-reward');
+}
+
+// ════════════════════════════════════════
+// TIMELINE
+// ════════════════════════════════════════
+function buildTimeline(){
+  const track=document.getElementById('tl-track');track.innerHTML='';
+  G.mission.phases.forEach((ph,i)=>{
+    if(i>0){const c=document.createElement('div');c.className='tl-c';c.id='tlc'+i;track.appendChild(c);}
+    const def=ENEMIES[ph.e];const n=document.createElement('div');
+    n.className='tl-n'+(ph.boss?' boss':'');n.id='tln'+i;n.textContent=def.icon;
+    const sk=document.createElement('span');sk.className='tl-skull';sk.textContent='✕';
+    n.appendChild(sk);track.appendChild(n);
+  });
+  updateTimeline();
+}
+function updateTimeline(){
+  G.mission.phases.forEach((_,i)=>{
+    const n=document.getElementById('tln'+i);if(!n)return;
+    n.classList.remove('done','curr');
+    if(i<G.phase)n.classList.add('done');else if(i===G.phase)n.classList.add('curr');
+    const c=document.getElementById('tlc'+i);if(c)c.classList.toggle('done',i<=G.phase);
+  });
+}
+
+// ════════════════════════════════════════
+// ENEMY STATUSES
+// ════════════════════════════════════════
+function addEStatus(id,txt){
+  const wrap=document.getElementById('e-statuses');
+  if(document.getElementById('es-'+id))return;
+  const t=document.createElement('span');t.id='es-'+id;t.className='e-stag stag-'+id;t.textContent=txt;
+  wrap.appendChild(t);
+}
+function removeEStatus(id){const el=document.getElementById('es-'+id);if(el)el.remove();}
+
+// ════════════════════════════════════════
+// COOLDOWNS
+// ════════════════════════════════════════
+function setCd(key,sec){
+  G.cds[key]=sec;
+  const btnMap={atk:'btn-atk',heavy:'btn-heavy',skill:'btn-skill'};
+  const btn=document.getElementById(btnMap[key]);
+  const bar=document.getElementById('cd-'+key);
+  if(btn)btn.disabled=true;if(bar)bar.style.width='100%';
+  const ms=sec*1000;let el=0;
+  if(G.cdIv[key])clearInterval(G.cdIv[key]);
+  G.cdIv[key]=setInterval(()=>{
+    el+=50;const pct=Math.max(0,100-el/ms*100);
+    if(bar)bar.style.width=pct+'%';
+    if(el>=ms){clearInterval(G.cdIv[key]);G.cds[key]=0;if(btn)btn.disabled=false;if(bar)bar.style.width='0%';}
+  },50);
+}
+
+// ════════════════════════════════════════
+// STAMINA REGEN
+// ════════════════════════════════════════
+setInterval(()=>{
+  if(G.scr!=='s-fight')return;
+  if(G.player.stm<G.player.maxStm){G.player.stm=Math.min(G.player.maxStm,G.player.stm+2.5);updatePlayerHUD();}
+},400);
+
+// ════════════════════════════════════════
+// VISUAL FX
+// ════════════════════════════════════════
+function floatLabel(x,y,txt,size,color){
+  const arena=document.getElementById('arena');
+  const el=document.createElement('div');el.className='float-label';
+  el.textContent=txt;
+  el.style.cssText=`left:${x}px;bottom:${y}px;font-size:${size}px;color:${color}`;
+  arena.appendChild(el);setTimeout(()=>el.remove(),1250);
+}
+
+function animateClass(el,cls,dur){
+  if(!el)return;
+  el.classList.remove(cls);void el.offsetWidth;
+  el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),dur);
+}
+
+// ════════════════════════════════════════
+// LOG
+// ════════════════════════════════════════
+function addLog(msg,type=''){
+  const log=document.getElementById('log');
+  const line=document.createElement('div');line.className='ll '+type;line.textContent=msg;
+  log.appendChild(line);log.scrollTop=log.scrollHeight;
+  while(log.children.length>25)log.removeChild(log.firstChild);
+}
+function clearLog(){document.getElementById('log').innerHTML='';}
+
+// ════════════════════════════════════════
+// NOTIF
+// ════════════════════════════════════════
+function showNotif(msg){
+  const ex=document.querySelector('.notif');if(ex)ex.remove();
+  const el=document.createElement('div');el.className='notif';el.textContent=msg;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),2400);
+}
+
+// ════════════════════════════════════════
+// FORGE
+// ════════════════════════════════════════
+let fTab='equip';
+function setFTab(t){
+  fTab=t;
+  document.querySelectorAll('.fg-tab').forEach((el,i)=>el.classList.toggle('on',['equip','jargas','anjanath','inv'][i]===t));
+  renderForge();
+}
+
+function renderForge(){
+  const body=document.getElementById('fg-body');body.innerHTML='';
+  if(fTab==='equip')renderEquipView(body);
+  else if(fTab==='jargas'){
+    const h=document.createElement('div');h.className='set-hdr sj';h.textContent='◆ CONJUNTO GRANDE JARGAS';body.appendChild(h);
+    Object.values(EQUIPMENT).filter(e=>e.set==='jargas').forEach(e=>renderEqCard(body,e.id));
+  } else if(fTab==='anjanath'){
+    const h=document.createElement('div');h.className='set-hdr sa';h.textContent='◆ CONJUNTO ANJANATH';body.appendChild(h);
+    Object.values(EQUIPMENT).filter(e=>e.set==='anjanath').forEach(e=>renderEqCard(body,e.id));
+  } else renderInventory(body);
+}
+
+function canCraft(key){return Object.entries(EQUIPMENT[key].mats).every(([id,n])=>(G.inv[id]||0)>=n);}
+function isCrafted(key){return !!(G.inv['cft_'+key]||(G.equip[EQUIPMENT[key].slot]===key));}
+
+function renderEqCard(container,key){
+  const eq=EQUIPMENT[key];const crafted=isCrafted(key);const equipped=G.equip[eq.slot]===key;const craftable=canCraft(key);
+  const card=document.createElement('div');card.className=`eq-card${craftable||crafted?' ok':''}${equipped?' on':''}`;
+  const stars=Array(5).fill(0).map((_,i)=>`<span class="es${i<eq.r?' l':''}">★</span>`).join('');
+  const statsH=Object.entries(eq.stats).map(([k,v])=>{const lb={attack:'ATQ',defense:'DEF',fireRes:'F.Res',poisonRes:'P.Res',fireAtk:'F.ATQ',poisonAtk:'P.ATQ',affinity:'CRIT',skill:'Hab.'};return`<div class="sp">${lb[k]||k}<span class="sv">${v}</span></div>`;}).join('');
+  const matsH=Object.entries(eq.mats).map(([id,n])=>{const hv=G.inv[id]||0;const mat=MATERIALS[id]||{icon:'📦',name:id};return`<div class="mc ${hv>=n?'hv':'nd'}">${mat.icon} ${mat.name} ${hv}/${n}</div>`;}).join('');
+  const slotN={weapon:'ARMA',head:'CABEÇA',chest:'PEITO',arms:'BRAÇOS',waist:'CINTURA',legs:'PERNAS'};
+  card.innerHTML=`<div class="eq-card-top"><span class="eq-icon">${eq.icon}</span><div class="eq-info"><div class="eq-name">${eq.name}</div><div class="eq-slot">${slotN[eq.slot]}</div></div><div class="eq-stars">${stars}</div></div><div class="eq-stats">${statsH}</div><div class="eq-mats"><div class="ml">MATERIAIS</div><div class="mats">${matsH}</div></div><div class="eq-acts">${crafted?`<span class="eq-badge">✓ FORJADO</span>`:`<button class="btn-forge" onclick="craftItem('${key}')" ${craftable?'':'disabled'}>FORJAR</button>`}${crafted?(equipped?`<span class="eq-badge" style="border-color:var(--ember);color:var(--ember)">⚔ EQUIPADO</span>`:`<button class="btn-equip" onclick="equipItem('${key}')">EQUIPAR</button>`):''}  </div>`;
+  container.appendChild(card);
+}
+
+function craftItem(key){
+  if(!canCraft(key))return;
+  const eq=EQUIPMENT[key];Object.entries(eq.mats).forEach(([id,n])=>{G.inv[id]-=n;});
+  G.inv['cft_'+key]=1;showNotif('✓ '+eq.name+' forjado!');renderForge();
+}
+function equipItem(key){
+  const eq=EQUIPMENT[key];G.equip[eq.slot]=key;showNotif('⚔️ '+eq.name+' equipado!');renderForge();
+  checkSetComplete();
+}
+
+function checkSetComplete(){
+  const sets={jargas:['jargas-gs','jargas-helm','jargas-mail','jargas-vamb','jargas-coil','jargas-grvs'],
+               anjanath:['anja-bow','anja-helm','anja-mail','anja-vamb','anja-coil','anja-grvs']};
+  for(const[sid,items]of Object.entries(sets)){
+    if(items.every(id=>G.equip[EQUIPMENT[id].slot]===id)){
+      setTimeout(()=>showModal({jargas:'🔥',anjanath:'☠️'}[sid],'CONJUNTO COMPLETO!',`ARMADURA ${sid.toUpperCase()} α`,`Você forjou todo o conjunto!`,[{label:'★ Ver',action:()=>showCompleteScreen(sid)}]),500);
+      break;
+    }
+  }
+}
+
+function renderEquipView(container){
+  const mann=document.createElement('div');mann.className='mann-sec';
+  mann.innerHTML='<div class="mann-title">◆ CONJUNTO EQUIPADO ◆</div>';
+  const layout=document.createElement('div');layout.className='mann-layout';
+  const left=[{s:'head',l:'CABEÇA',i:'⛑️'},{s:'chest',l:'PEITO',i:'🦺'},{s:'arms',l:'BRAÇOS',i:'🧤'}];
+  const right=[{s:'waist',l:'CINTURA',i:'🎗️'},{s:'legs',l:'PERNAS',i:'👢'},{s:'weapon',l:'ARMA',i:'🗡️'}];
+  const lc=document.createElement('div');lc.className='mann-col';left.forEach(s=>lc.appendChild(mkSlot(s)));
+  const cc=document.createElement('div');cc.className='mann-center';cc.innerHTML='<div style="font-size:48px;margin:6px 0">🧍</div>';
+  const rc=document.createElement('div');rc.className='mann-col';right.forEach(s=>rc.appendChild(mkSlot(s)));
+  layout.appendChild(lc);layout.appendChild(cc);layout.appendChild(rc);mann.appendChild(layout);
+  const td=5+equipDef(),ta=18+equipAtk();
+  const bonus=['head','chest','arms','waist','legs'].reduce((a,s)=>{const e=G.equip[s];return a+(e?(EQUIPMENT[e]?.stats?.fireRes||EQUIPMENT[e]?.stats?.poisonRes||0):0);},0);
+  mann.innerHTML+=`<div class="tot-stats"><div class="ts"><div class="tsv">${ta}</div><div class="tsl">ATAQUE</div></div><div class="ts"><div class="tsv">${td}</div><div class="tsl">DEFESA</div></div><div class="ts"><div class="tsv">${bonus}</div><div class="tsl">RES.ELEM</div></div></div>`;
+  container.appendChild(mann);
+  const skills=[];['head','chest','arms','waist','legs'].forEach(s=>{const e=G.equip[s];if(e&&EQUIPMENT[e]?.stats?.skill)skills.push(EQUIPMENT[e].stats.skill);});
+  if(skills.length){const sk=document.createElement('div');sk.style.cssText='background:var(--bg3);border:1px solid var(--bdg);border-radius:3px;padding:10px;margin-bottom:10px';sk.innerHTML=`<div style="font-family:'Cinzel',serif;font-size:8px;color:var(--gold);letter-spacing:3px;margin-bottom:6px">HABILIDADES</div>${skills.map(s=>`<div style="font-size:11px;color:var(--txt);padding:3px 0;border-bottom:1px solid var(--bdr)">${s}</div>`).join('')}`;container.appendChild(sk);}
+}
+function mkSlot(s){
+  const el=document.createElement('div');const e=G.equip[s.s];el.className='m-slot'+(e?' filled':'');
+  if(e){const eq=EQUIPMENT[e];el.innerHTML=`<div class="ms-lbl">${s.l}</div><span class="ms-ico">${eq.icon}</span><div class="ms-itm">${eq.name}</div>`;}
+  else el.innerHTML=`<div class="ms-lbl">${s.l}</div><span class="ms-ico" style="opacity:.3">${s.i}</span>`;
+  return el;
+}
+function renderInventory(container){
+  const title=document.createElement('div');title.style.cssText='font-family:"Cinzel",serif;font-size:8px;color:var(--gold);letter-spacing:3px;margin-bottom:9px';title.textContent='MATERIAIS COLETADOS';container.appendChild(title);
+  const grid=document.createElement('div');grid.className='inv-grid';let any=false;
+  Object.keys(MATERIALS).forEach(id=>{const qty=G.inv[id]||0;if(qty<=0)return;any=true;const mat=MATERIALS[id];const el=document.createElement('div');el.className='iv-item';el.innerHTML=`<span class="iv-ico">${mat.icon}</span><span class="iv-nm">${mat.name}</span><span class="iv-qty">${qty}</span>`;grid.appendChild(el);});
+  if(!any)grid.innerHTML='<div style="grid-column:span 4;text-align:center;color:var(--txt3);font-style:italic;padding:18px;font-size:11px">Nenhum material.<br>Vá caçar!</div>';
+  container.appendChild(grid);
+}
+
+// ════════════════════════════════════════
+// COMPLETE
+// ════════════════════════════════════════
+function showCompleteScreen(setId){
+  closeModal();
+  const cfg={jargas:{eye:'★ CONJUNTO JARGAS ★',icon:'🔥',name:'Armadura Jargas α',sub:'"O fogo do Dragão Ancião arde em você"',lbl:'Defesa · Ataque · Res. Fogo'},
+               anjanath:{eye:'★ CONJUNTO ANJANATH ★',icon:'☠️',name:'Armadura Anjanath α',sub:'"O veneno do Dragão Bruto flui em você"',lbl:'Defesa · Ataque · Res. Veneno'}};
+  const c=cfg[setId]||cfg.jargas;
+  document.getElementById('cmp-eye').textContent=c.eye;
+  document.getElementById('cmp-icon').textContent=c.icon;
+  document.getElementById('cmp-name').textContent=c.name;
+  document.getElementById('cmp-sub').textContent=c.sub;
+  document.getElementById('cmp-slabel').textContent=c.lbl;
+  const td=5+equipDef(),ta=18+equipAtk();
+  const bonus=['head','chest','arms','waist','legs'].reduce((a,s)=>{const e=G.equip[s];return a+(e?(EQUIPMENT[e]?.stats?.fireRes||EQUIPMENT[e]?.stats?.poisonRes||0):0);},0);
+  document.getElementById('cmp-power').textContent=td+ta+bonus;
+  const btns=document.getElementById('cmp-btns');btns.innerHTML='';
+  const b1=document.createElement('button');b1.className='btn-p';b1.textContent='◆ MISSÕES';b1.onclick=()=>{showScreen('s-mission');renderMissions();};btns.appendChild(b1);
+  const b2=document.createElement('button');b2.className='btn-s';b2.textContent='🔨 Ferraria';b2.onclick=()=>{showScreen('s-forge');renderForge();};btns.appendChild(b2);
+  showScreen('s-complete');
+}
+
+// ════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════
+function showModal(icon,title,sub,body,buttons){
+  document.getElementById('m-icon').textContent=icon;document.getElementById('m-title').textContent=title;
+  document.getElementById('m-sub').textContent=sub;document.getElementById('m-body').textContent=body;
+  const btns=document.getElementById('m-btns');btns.innerHTML='';
+  buttons.forEach(b=>{const btn=document.createElement('button');btn.className='btn-p';btn.textContent=b.label;btn.onclick=b.action;btns.appendChild(btn);});
+  const cl=document.createElement('button');cl.className='btn-s';cl.textContent='Fechar';cl.onclick=closeModal;btns.appendChild(cl);
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+
+// ════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+// ════════════════════════════════════════
+// SISTEMA DE MODS E INDEXEDDB
+// ════════════════════════════════════════
+const MOD_DB_NAME = 'DominioAncestralMods';
+const MOD_DB_VERSION = 1;
+let modDB;
+// ════════════════════════════════════════
+// LABORATÓRIO (UI MOD MAKER)
+// ════════════════════════════════════════
+let labTab = 'monster';
+let tempBase64Image = null;
+
+function setLabTab(t) {
+  labTab = t;
+  const tabs = document.getElementById('lab-tabs').children;
+  Array.from(tabs).forEach((el, i) => {
+    el.classList.toggle('on', ['monster', 'armor', 'io'][i] === t);
+  });
+  renderLab();
+}
+
+function renderLab() {
+  const body = document.getElementById('lab-body');
+  body.innerHTML = '';
+
+  if (labTab === 'monster') {
+    body.innerHTML = `
+      <div class="lab-form">
+        <div class="lab-row">
+          <div class="lab-col"><label class="lab-lbl">ID (Sem espaços)</label><input type="text" id="mod-m-id" class="lab-inp" placeholder="ex: dragao_sombrio"></div>
+          <div class="lab-col"><label class="lab-lbl">ÍCONE (Emoji)</label><input type="text" id="mod-m-icon" class="lab-inp" value="🔮" maxlength="2"></div>
+        </div>
+        <div class="lab-col"><label class="lab-lbl">NOME DA AMEAÇA</label><input type="text" id="mod-m-name" class="lab-inp" placeholder="ex: Dragão Sombrio"></div>
+        <div class="lab-row">
+          <div class="lab-col"><label class="lab-lbl">PONTOS DE VIDA</label><input type="number" id="mod-m-hp" class="lab-inp" value="600"></div>
+          <div class="lab-col"><label class="lab-lbl">ATAQUE</label><input type="number" id="mod-m-atk" class="lab-inp" value="35"></div>
+          <div class="lab-col"><label class="lab-lbl">DEFESA</label><input type="number" id="mod-m-def" class="lab-inp" value="12"></div>
+        </div>
+        <div class="lab-col">
+          <label class="lab-lbl">APARÊNCIA (Upload de Imagem)</label>
+          <div class="lab-file-box">
+            <span class="lab-file-txt">SELECIONAR IMAGEM</span>
+            <input type="file" id="mod-m-img" class="lab-file-inp" accept="image/*" onchange="processarImagemMod(event)">
+            <img id="mod-m-preview" class="lab-img-preview">
+          </div>
+        </div>
+        <button class="btn-p" style="margin-top: 10px;" onclick="salvarMonstroMod()">◆ CONJURAR MONSTRO ◆</button>
+      </div>
+    `;
+    if (tempBase64Image) {
+      const p = document.getElementById('mod-m-preview');
+      p.src = tempBase64Image; p.style.display = 'inline-block';
+    }
+  } else if (labTab === 'armor') {
+    const tx = modDB.transaction(['custom_packs'], 'readonly');
+    tx.objectStore('custom_packs').getAll().onsuccess = (e) => {
+      const packs = e.target.result;
+      if(packs.length === 0) {
+        body.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt2);font-size:12px;font-style:italic">Crie um monstro primeiro para forjar equipamentos.</div>';
+        return;
+      }
+      
+      const opts = packs.map(p => `<option value="${p.id}">${p.monster.name}</option>`).join('');
+      body.innerHTML = `
+        <div class="lab-form">
+          <div class="lab-col"><label class="lab-lbl">VINCULAR AO MONSTRO</label><select id="mod-e-pack" class="lab-inp">${opts}</select></div>
+          <div class="lab-row">
+            <div class="lab-col">
+              <label class="lab-lbl">TIPO DE EQUIPAMENTO</label>
+              <select id="mod-e-slot" class="lab-inp">
+                <option value="weapon">Arma</option><option value="head">Elmo</option>
+                <option value="chest">Peitoral</option><option value="arms">Manoplas</option>
+                <option value="waist">Cinto</option><option value="legs">Grevas</option>
+              </select>
+            </div>
+            <div class="lab-col"><label class="lab-lbl">ÍCONE (Emoji)</label><input type="text" id="mod-e-icon" class="lab-inp" value="🛡️" maxlength="2"></div>
+          </div>
+          <div class="lab-col"><label class="lab-lbl">NOME DO PROJETO</label><input type="text" id="mod-e-name" class="lab-inp" placeholder="ex: Lâmina Sombria"></div>
+          <div class="lab-row">
+            <div class="lab-col"><label class="lab-lbl">PODER (Ataque ou Defesa)</label><input type="number" id="mod-e-power" class="lab-inp" value="45"></div>
+            <div class="lab-col"><label class="lab-lbl">HABILIDADE (Texto Livre)</label><input type="text" id="mod-e-skill" class="lab-inp" placeholder="ex: Fúria Lv2"></div>
+          </div>
+          <button class="btn-p" style="margin-top: 10px;" onclick="salvarEquipamentoMod()">◆ FORJAR PROJETO ◆</button>
+        </div>
+      `;
+    };
+  } else if (labTab === 'io') {
+    body.innerHTML = `
+      <div class="lab-form" style="align-items:center; text-align:center; padding-top:20px;">
+        <div style="margin-bottom:20px; color:var(--txt2); font-size:12px; line-height:1.6;">
+          Exporte suas anomalias para fazer backup ou compartilhe-as.<br>
+          Importe arquivos <b>.json</b> para enfrentar as criações de outros caçadores.
+        </div>
+        
+        <button class="btn-p" style="width:90%; padding:14px; margin-bottom:24px; font-size:14px;" onclick="exportarMods()">📥 EXPORTAR TODOS OS MODS</button>
+        
+        <div class="lab-file-box" style="width:90%; padding:24px;">
+          <span class="lab-file-txt" style="font-size:14px;">📤 IMPORTAR PACOTE (.JSON)</span>
+          <input type="file" class="lab-file-inp" accept=".json" onchange="importarMods(event)">
+        </div>
+      </div>
+    `;
+  }
+}
+// ════════════════════════════════════════
+// SISTEMA DE I/O (ARQUIVOS JSON)
+// ════════════════════════════════════════
+function exportarMods() {
+  const tx = modDB.transaction(['custom_packs'], 'readonly');
+  tx.objectStore('custom_packs').getAll().onsuccess = (e) => {
+    const packs = e.target.result;
+    if(packs.length === 0) { 
+      showNotif("❌ Nenhum monstro no Laboratório para exportar!"); 
+      return; 
+    }
+    
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(packs));
+    const dl = document.createElement('a');
+    dl.setAttribute("href", dataStr);
+    dl.setAttribute("download", "dominio_ancestral_mods.json");
+    document.body.appendChild(dl); 
+    dl.click(); 
+    dl.remove();
+    showNotif("✓ Arquivo de Mods exportado com sucesso!");
+  };
+}
+
+function importarMods(event) {
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const packs = JSON.parse(e.target.result);
+      if(!Array.isArray(packs)) throw new Error("Formato inválido");
+      
+      const tx = modDB.transaction(['custom_packs'], 'readwrite');
+      const store = tx.objectStore('custom_packs');
+      
+      packs.forEach(p => store.put(p)); // Salva no banco de dados local
+      
+      tx.oncomplete = () => {
+        showNotif("✓ Novas anomalias importadas com sucesso!");
+        loadCustomPacks(); // Recarrega imediatamente para uso no jogo
+        setTimeout(() => { setLabTab('monster'); }, 500); // Volta pra tela principal
+      };
+    } catch(err) {
+      showNotif("❌ Erro: O arquivo não é um pacote válido.");
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ════════════════════════════════════════
+// SALVAR EQUIPAMENTO NO BANCO
+// ════════════════════════════════════════
+function salvarEquipamentoMod() {
+  const packId = document.getElementById('mod-e-pack').value;
+  const slot = document.getElementById('mod-e-slot').value;
+  const icon = document.getElementById('mod-e-icon').value || '🛡️';
+  const name = document.getElementById('mod-e-name').value.trim();
+  const power = parseInt(document.getElementById('mod-e-power').value) || 0;
+  const skill = document.getElementById('mod-e-skill').value.trim();
+
+  if(!name) { showNotif("❌ Dê um nome ao equipamento!"); return; }
+
+  const tx = modDB.transaction(['custom_packs'], 'readwrite');
+  const store = tx.objectStore('custom_packs');
+  
+  store.get(packId).onsuccess = (e) => {
+    const pack = e.target.result;
+    if(!pack.equipment) pack.equipment = {};
+    
+    const eqId = pack.monster.id + '_' + slot;
+    const isWeapon = slot === 'weapon';
+
+    // Cria o projeto exigindo os drops recém gerados daquele monstro!
+    pack.equipment[eqId] = {
+      id: eqId, slot: slot, name: name, icon: icon, r: 5,
+      set: pack.monster.id,
+      stats: isWeapon ? { attack: power, affinity: 10 } : { defense: power, skill: skill || 'Nenhuma' },
+      mats: { [pack.monster.id + '-scale']: 3, [pack.monster.id + '-hide']: 2 },
+      desc: 'Forjado com restos de ' + pack.monster.name
+    };
+
+    store.put(pack).onsuccess = () => {
+      injetarPacoteNoMotor(pack);
+      showNotif("✓ Equipamento adicionado ao pacote!");
+      document.getElementById('mod-e-name').value = '';
+    };
+  };
+}
+
+// ════════════════════════════════════════
+// PROCESSAMENTO DE IMAGEM
+// ════════════════════════════════════════
+function processarImagemMod(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    tempBase64Image = e.target.result;
+    const preview = document.getElementById('mod-m-preview');
+    preview.src = tempBase64Image;
+    preview.style.display = 'inline-block';
+    showNotif("✓ Imagem processada com sucesso");
+  };
+  // Converte a imagem para Base64
+  reader.readAsDataURL(file);
+}
+
+// ════════════════════════════════════════
+// SALVAR NO BANCO
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+// SALVAR NO BANCO E GERAR DROPS
+// ════════════════════════════════════════
+// ════════════════════════════════════════
+// SALVAR NO BANCO (AGORA COM PARTES E MEGA DROPS)
+// ════════════════════════════════════════
+function salvarMonstroMod() {
+  const id = document.getElementById('mod-m-id').value.trim().toLowerCase();
+  const name = document.getElementById('mod-m-name').value.trim();
+  const icon = document.getElementById('mod-m-icon').value || '🔮';
+  const hp = parseInt(document.getElementById('mod-m-hp').value);
+  const atk = parseInt(document.getElementById('mod-m-atk').value);
+  const def = parseInt(document.getElementById('mod-m-def').value);
+
+  if (!id || !name || !tempBase64Image) {
+    showNotif("❌ Preencha ID, Nome e selecione uma imagem!");
+    return;
+  }
+
+  // Expandindo o ecossistema de drops
+  const mHide = id + '-hide', mScale = id + '-scale', mClaw = id + '-claw';
+  const mTail = id + '-tail', mGem = id + '-gem', mHead = id + '-head';
+
+  // Criando a geometria das partes a serem quebradas na tela
+  const customParts = [
+    {id:'head', label:'Cabeça', icon:'💀', x:'30%', y:'5%', w:'40%', h:'30%', dmgMult:1.5, weakspot:true, maxHp:3, hp:3},
+    {id:'body', label:'Corpo', icon:'🐉', x:'15%', y:'35%', w:'70%', h:'45%', dmgMult:1.0, maxHp:6, hp:6},
+    {id:'tail', label:'Cauda', icon:'🗡️', x:'60%', y:'40%', w:'35%', h:'35%', dmgMult:1.3, maxHp:4, hp:4},
+    {id:'limbs', label:'Garras', icon:'🐾', x:'15%', y:'50%', w:'30%', h:'30%', dmgMult:1.1, maxHp:3, hp:3}
+  ];
+
+  const novoPacote = {
+    id: 'pack_' + id,
+    type: 'custom_monster_pack',
+    monster: {
+      id: id, name: name, icon: icon, isBoss: true, hp: hp, atk: atk, def: def, w: 150, h: 150,
+      image_base64: tempBase64Image,
+      drops: [
+        { id: mScale, qty: [2, 4], c: 1.0 },
+        { id: mHide, qty: [1, 3], c: 0.9 },
+        { id: mClaw, qty: [1, 2], c: 0.7 },
+        { id: mTail, qty: [1, 1], c: 0.4 },
+        { id: mHead, qty: [1, 1], c: 0.3 },
+        { id: mGem, qty: [1, 1], c: 0.1 } // Drop raríssimo!
+      ]
+    },
+    parts: customParts,
+    materials: {
+      [mHide]: { name: 'Couro ' + name, icon: '🟤', r: 3 },
+      [mScale]: { name: 'Escama ' + name, icon: '💠', r: 3 },
+      [mClaw]: { name: 'Garra ' + name, icon: '🩸', r: 4 },
+      [mTail]: { name: 'Cauda ' + name, icon: '🐉', r: 4 },
+      [mHead]: { name: 'Cabeça ' + name, icon: '💀', r: 4 },
+      [mGem]: { name: 'Gema ' + name, icon: '💎', r: 5 }
+    },
+    equipment: {}
+  };
+
+  saveCustomPack(novoPacote);
+  tempBase64Image = null;
+  renderLab();
+}
+
+function initModSystem() {
+  const req = indexedDB.open(MOD_DB_NAME, MOD_DB_VERSION);
+
+  req.onupgradeneeded = (e) => {
+    modDB = e.target.result;
+    if (!modDB.objectStoreNames.contains('custom_packs')) {
+      modDB.createObjectStore('custom_packs', { keyPath: 'id' });
+    }
+  };
+
+  req.onsuccess = (e) => {
+    modDB = e.target.result;
+    console.log("⚙️ Motor de Mods conectado com sucesso.");
+    loadCustomPacks();
+  };
+
+  req.onerror = (e) => {
+    console.error("❌ Erro ao abrir IndexedDB", e);
+  };
+}
+
+function loadCustomPacks() {
+  const tx = modDB.transaction(['custom_packs'], 'readonly');
+  const store = tx.objectStore('custom_packs');
+  const req = store.getAll();
+
+  req.onsuccess = (e) => {
+    const packs = e.target.result;
+    packs.forEach(pacote => injetarPacoteNoMotor(pacote));
+    
+    // Se já estivermos na tela de missões, recarrega a lista para mostrar os customizados
+    if (packs.length > 0 && G.scr === 's-mission') {
+      renderMissions();
+    }
+  };
+}
+
+function injetarPacoteNoMotor(pacote) {
+  if(pacote.monster) {
+    // Upgrade de monstros antigos: Adiciona as 6 partes e materiais se tiverem menos que isso
+    if(!pacote.monster.drops || pacote.monster.drops.length <= 2) {
+      const id = pacote.monster.id;
+      const name = pacote.monster.name;
+      const mHide = id + '-hide', mScale = id + '-scale', mClaw = id + '-claw';
+      const mTail = id + '-tail', mGem = id + '-gem', mHead = id + '-head';
+      
+      pacote.monster.drops = [
+        { id: mScale, qty: [2, 4], c: 1.0 }, { id: mHide, qty: [1, 3], c: 0.9 },
+        { id: mClaw, qty: [1, 2], c: 0.7 }, { id: mTail, qty: [1, 1], c: 0.4 },
+        { id: mHead, qty: [1, 1], c: 0.3 }, { id: mGem, qty: [1, 1], c: 0.1 }
+      ];
+      
+      if(!pacote.materials) pacote.materials = {};
+      pacote.materials[mHide] = { name: 'Couro ' + name, icon: '🟤', r: 3 };
+      pacote.materials[mScale] = { name: 'Escama ' + name, icon: '💠', r: 3 };
+      pacote.materials[mClaw] = { name: 'Garra ' + name, icon: '🩸', r: 4 };
+      pacote.materials[mTail] = { name: 'Cauda ' + name, icon: '🐉', r: 4 };
+      pacote.materials[mHead] = { name: 'Cabeça ' + name, icon: '💀', r: 4 };
+      pacote.materials[mGem] = { name: 'Gema ' + name, icon: '💎', r: 5 };
+
+      if(!pacote.parts) {
+        pacote.parts = [
+          {id:'head', label:'Cabeça', icon:'💀', x:'30%', y:'5%', w:'40%', h:'30%', dmgMult:1.5, weakspot:true, maxHp:3, hp:3},
+          {id:'body', label:'Corpo', icon:'🐉', x:'15%', y:'35%', w:'70%', h:'45%', dmgMult:1.0, maxHp:6, hp:6},
+          {id:'tail', label:'Cauda', icon:'🗡️', x:'60%', y:'40%', w:'35%', h:'35%', dmgMult:1.3, maxHp:4, hp:4},
+          {id:'limbs', label:'Garras', icon:'🐾', x:'15%', y:'50%', w:'30%', h:'30%', dmgMult:1.1, maxHp:3, hp:3}
+        ];
+      }
+    }
+
+    ENEMIES[pacote.monster.id] = {
+      ...pacote.monster,
+      svg: () => `<img src="${pacote.monster.image_base64}" style="width:100%;height:100%;object-fit:contain;pointer-events:none;filter:drop-shadow(0px 10px 10px rgba(0,0,0,0.5));">`
+    };
+    
+    PARTS_DEF[pacote.monster.id] = pacote.parts || PARTS_DEF.default;
+    
+    MISSIONS[pacote.monster.id] = {
+      id: pacote.monster.id, name: pacote.monster.name, icon: pacote.monster.icon || '🔮',
+      location: 'FENDAS DIMENSIONAIS', stars: pacote.stars || 5, tags: ['custom'], tagLabels: ['Anomalia'],
+      phases: [{ e: pacote.monster.id, boss: true }],
+      skyColor: 'radial-gradient(ellipse at 50% 100%,#3a0a3a40,#0d0a0690)',
+      bossEye: '— Ameaça Desconhecida —', bossIcon: pacote.monster.icon || '🔮'
+    };
+  }
+
+  if(pacote.materials) Object.assign(MATERIALS, pacote.materials);
+  if(pacote.equipment) Object.assign(EQUIPMENT, pacote.equipment);
+}
+
+// Função utilitária que usaremos mais tarde para salvar o que criarmos na tela
+function saveCustomPack(pacote) {
+  const tx = modDB.transaction(['custom_packs'], 'readwrite');
+  const store = tx.objectStore('custom_packs');
+  store.put(pacote);
+  tx.oncomplete = () => {
+    injetarPacoteNoMotor(pacote);
+    showNotif("✓ Criação salva nos registros ancestrais!");
+    if (G.scr === 's-mission') renderMissions();
+  };
+}
+// ════════════════════════════════════════
+// FERRARIA INTELIGENTE (SOBRESCRITA)
+// ════════════════════════════════════════
+function renderForge() {
+  const tx = modDB.transaction(['custom_packs'], 'readonly');
+  tx.objectStore('custom_packs').getAll().onsuccess = (e) => {
+    const packs = e.target.result;
+    
+    // 1. Constrói as Abas Dinamicamente
+    const tabsWrap = document.getElementById('fg-tabs');
+    let tabsHtml = `
+      <button class="fg-tab ${fTab==='equip'?'on':''}" onclick="setFTab('equip')">Equipado</button>
+      <button class="fg-tab ${fTab==='jargas'?'on':''}" onclick="setFTab('jargas')">Jargas</button>
+      <button class="fg-tab ${fTab==='anjanath'?'on':''}" onclick="setFTab('anjanath')">Anjanath</button>
+      <button class="fg-tab ${fTab==='inv'?'on':''}" onclick="setFTab('inv')">Materiais</button>
+    `;
+    packs.forEach(p => {
+      tabsHtml += `<button class="fg-tab ${fTab===p.monster.id?'on':''}" onclick="setFTab('${p.monster.id}')">${p.monster.name}</button>`;
+    });
+    tabsWrap.innerHTML = tabsHtml;
+
+    // 2. Renderiza o conteúdo selecionado
+    const body = document.getElementById('fg-body');
+    body.innerHTML = '';
+    
+    if (fTab === 'equip') renderEquipView(body);
+    else if (fTab === 'jargas') {
+      const h = document.createElement('div'); h.className = 'set-hdr sj'; h.textContent = '◆ CONJUNTO GRANDE JARGAS'; body.appendChild(h);
+      Object.values(EQUIPMENT).filter(eq => eq.set === 'jargas').forEach(eq => renderEqCard(body, eq.id));
+    } 
+    else if (fTab === 'anjanath') {
+      const h = document.createElement('div'); h.className = 'set-hdr sa'; h.textContent = '◆ CONJUNTO ANJANATH'; body.appendChild(h);
+      Object.values(EQUIPMENT).filter(eq => eq.set === 'anjanath').forEach(eq => renderEqCard(body, eq.id));
+    } 
+    else if (fTab === 'inv') renderInventory(body);
+    else {
+      // É uma aba customizada! O motor renderiza seus mods lindamente.
+      const activePack = packs.find(p => p.monster.id === fTab);
+      if(activePack) {
+        const h = document.createElement('div'); h.className = 'set-hdr'; h.style.color = 'var(--gold-light)'; 
+        h.textContent = '◆ CONJUNTO ' + activePack.monster.name.toUpperCase(); body.appendChild(h);
+        Object.values(EQUIPMENT).filter(eq => eq.set === activePack.monster.id).forEach(eq => renderEqCard(body, eq.id));
+      }
+    }
+  };
+}
+// ════════════════════════════════════════
+// MOTOR DE MOVIMENTO LIVRE E RESPONSIVIDADE
+// ════════════════════════════════════════
+let walkDir = 0;
+let walkTimer = null;
+
+function startWalk(dir) {
+  if (G.player.dodgeActive || G.player.hp <= 0) return;
+  walkDir = dir;
+  if (!walkTimer) walkTimer = requestAnimationFrame(walkLoop);
+}
+
+function stopWalk() {
+  walkDir = 0;
+  if (walkTimer) { cancelAnimationFrame(walkTimer); walkTimer = null; }
+}
+
+function walkLoop() {
+  if (walkDir !== 0 && G.scr === 's-fight' && G.player.hp > 0 && !G.player.dodgeActive) {
+    // Velocidade de caminhada (0.0035 = 0.35% da arena por frame)
+    const speed = 0.0035; 
+    G.player.x = Math.max(0.02, Math.min(0.98, G.player.x + (walkDir * speed)));
+    placePlayer();
+  }
+  
+  if (walkDir !== 0) walkTimer = requestAnimationFrame(walkLoop);
+  else walkTimer = null;
+}
+
+// Controles pelo Teclado (PC)
+window.addEventListener('keydown', (e) => {
+  if (G.scr !== 's-fight') return;
+  if (e.key === 'ArrowLeft' || e.key === 'a') startWalk(-1);
+  if (e.key === 'ArrowRight' || e.key === 'd') startWalk(1);
+  // Atalhos úteis: Espaço para esquiva
+  if (e.key === ' ') {
+    doDodge(walkDir !== 0 ? walkDir : (G.enemyX > G.player.x ? -1 : 1));
+  }
+});
+
+window.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'ArrowRight' || e.key === 'd') stopWalk();
+});
+
+// Mantém a Arena perfeita se virar o celular ou redimensionar a tela
+window.addEventListener('resize', () => {
+  if (G.scr === 's-fight') {
+    getArenaRect();
+    placePlayer();
+    placeEnemy();
+  }
+});
+// INIT
+initModSystem();
+renderMissions();
+</script>
+</body>
+</html>
